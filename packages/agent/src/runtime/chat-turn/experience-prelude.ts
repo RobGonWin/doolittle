@@ -1,4 +1,5 @@
 import type { AgentExecutionContext } from "@/runtime/chat";
+import { renderDoolittleSoulContext } from "@/runtime/soul";
 import type { TurnState } from "./state";
 
 type CharacterShape = {
@@ -156,6 +157,8 @@ export function buildDoolittleExperiencePrelude(input: {
     "- Keep final answers human and compact: answer first, then mention verification or next work only when useful.",
     "",
     ...buildCharacterVoiceContext(input.context),
+    "",
+    ...renderDoolittleSoulContext(input.context.config.workspaceDir),
     "",
     ...buildRecentConversationContext({
       context: input.context,

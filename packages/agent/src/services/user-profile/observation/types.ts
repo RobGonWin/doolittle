@@ -1,5 +1,6 @@
 export interface ParsedUserObservation {
   lower: string;
+  displayName?: string;
   preference?: string;
   belief?: string;
   fact?: string;

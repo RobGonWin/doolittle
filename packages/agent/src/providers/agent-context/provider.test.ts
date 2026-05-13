@@ -3,11 +3,16 @@ import type { Memory } from "@elizaos/core";
 import type { AppServices } from "@/services";
 import { createAgentContextProvider } from "./provider";
 
-function createMemory(text: string, id = "memory-1"): Memory {
+function createMemory(
+  text: string,
+  id = "memory-1",
+  metadata?: Memory["metadata"],
+): Memory {
   return {
     id,
     roomId: "room-1",
     content: { text },
+    metadata,
     createdAt: Date.now(),
   } as Memory;
 }
@@ -187,5 +192,29 @@ describe("agent context provider", () => {
     expect(result.text).toContain("ACTIVE PERSONALITY");
     expect(result.text).toContain("AVAILABLE SKILLS");
     expect(result.text).not.toContain("WORKSPACE CONTEXT");
+  });
+
+  it("injects per-turn Doolittle prelude without reusing stale session context", async () => {
+    const { services } = createServices();
+    const provider = createAgentContextProvider(services);
+
+    const first = await provider.get(
+      {} as never,
+      createMemory("hello there", "turn-4", {
+        doolittle: { messagePrelude: "first soul context" },
+      } as never),
+      {} as never,
+    );
+    const second = await provider.get(
+      {} as never,
+      createMemory("hello again", "turn-5", {
+        doolittle: { messagePrelude: "second soul context" },
+      } as never),
+      {} as never,
+    );
+
+    expect(first.text).toContain("first soul context");
+    expect(second.text).toContain("second soul context");
+    expect(second.text).not.toContain("first soul context");
   });
 });

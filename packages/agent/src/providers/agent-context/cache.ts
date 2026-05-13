@@ -107,6 +107,14 @@ export class AgentContextCache {
 
     sessionCache.set(scope, entry);
 
+    this.storeTurn(turnKey, scope, entry);
+  }
+
+  storeTurn(
+    turnKey: string,
+    scope: AgentContextScope,
+    entry: AgentContextCacheEntry,
+  ): void {
     const frozenTurnEntry = this.turnScopedCache.get(turnKey) ?? {
       capturedAt: Date.now(),
       scopes: new Map<AgentContextScope, AgentContextCacheEntry>(),

@@ -85,7 +85,9 @@ export async function runNativeProviderStage(
     localSynthesisPrelude = synthesisResult.localSynthesisPrelude;
   }
 
-  const { effectiveMessage } = modelInputAssembly.build(localSynthesisPrelude);
+  const { effectiveMessage, messagePrelude } = modelInputAssembly.build(
+    localSynthesisPrelude,
+  );
   const readinessMessage = await dependencies.getProviderReadinessMessage(
     input.context,
     input.settingsDuring.model.provider,
@@ -108,6 +110,7 @@ export async function runNativeProviderStage(
     context: input.context,
     turn,
     effectiveMessage,
+    messagePrelude,
     settingsBefore,
     settingsDuring: input.settingsDuring,
     capabilityProfile: modelInputAssembly.capabilityProfile,

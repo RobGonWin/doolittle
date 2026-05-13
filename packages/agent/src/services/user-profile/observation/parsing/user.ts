@@ -10,9 +10,16 @@ function matchSingle(
 
 export function parseUserObservation(message: string): ParsedUserObservation {
   const observation = message.trim();
+  const displayName =
+    matchSingle(
+      observation,
+      /\b(?:update|set|save)\s+my\s+name\s+(?:to|as)\s+([^,.!?;\n]+)(?:[,.!?;]|$)/iu,
+    ) ??
+    matchSingle(observation, /\bmy\s+name\s+is\s+([^,.!?;\n]+)(?:[,.!?;]|$)/iu);
 
   return {
     lower: observation.toLowerCase(),
+    displayName,
     preference: matchSingle(
       observation,
       /\b(?:i prefer|i like|i usually use)\s+(.+?)(?:[.!?]|$)/iu,

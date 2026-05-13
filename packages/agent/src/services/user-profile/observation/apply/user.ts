@@ -10,6 +10,9 @@ export function applyUserObservationSignals(
 ): void {
   const signals = parseUserObservation(observation);
 
+  if (signals.displayName && signals.displayName.length < 100) {
+    profile.displayName = signals.displayName.trim();
+  }
   if (signals.preference && signals.preference.length < 160) {
     profile.preferences = host.unique([
       ...profile.preferences,
@@ -24,7 +27,7 @@ export function applyUserObservationSignals(
     ]);
   }
   if (signals.fact && signals.fact.length < 160) {
-    if (signals.lower.startsWith("my name is")) {
+    if (signals.lower.startsWith("my name is") && !signals.displayName) {
       profile.displayName = signals.fact.trim();
     } else {
       profile.facts = host.unique([...profile.facts, signals.fact]);

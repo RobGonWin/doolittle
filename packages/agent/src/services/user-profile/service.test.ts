@@ -27,6 +27,19 @@ describe("UserProfileService", () => {
     }
   });
 
+  it("learns explicit display name update phrasing", () => {
+    const root = mkdtempSync(join(tmpdir(), "doolittle-user-profile-name-"));
+    const service = new UserProfileService(root);
+
+    try {
+      service.observe("user-name", "Update my name to SYMBiEX, please.", "cli");
+
+      expect(service.get("user-name").displayName).toBe("SYMBiEX");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("extracts aliases, goals, tools, and work style signals", () => {
     const root = mkdtempSync(join(tmpdir(), "doolittle-user-profile-signals-"));
     const service = new UserProfileService(root);

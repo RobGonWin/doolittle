@@ -18,6 +18,7 @@ function buildCoreContextSections(
   services: AppServices,
   scope: "minimal" | "local" | "full",
   repoSummary: string,
+  messagePrelude?: string,
 ): { sections: string[]; data: AgentContextData } {
   const personality = services.personalities.getActive();
   const settings = services.settings.get();
@@ -42,6 +43,9 @@ function buildCoreContextSections(
       : services.workspace.summary(scope === "full" ? 16 : 8);
 
   const sections: string[] = [
+    ...(messagePrelude?.trim()
+      ? ["Doolittle turn context:", messagePrelude.trim(), ""]
+      : []),
     ...renderMemorySections(memorySummary, userSummary),
     "",
     ...renderIdentitySections(personality, settings),
@@ -85,6 +89,14 @@ function buildCoreContextSections(
   };
 }
 
+function getDoolittleMessagePrelude(message: Memory): string | undefined {
+  const metadata = message.metadata as
+    | { doolittle?: { messagePrelude?: unknown } }
+    | undefined;
+  const prelude = metadata?.doolittle?.messagePrelude;
+  return typeof prelude === "string" && prelude.trim() ? prelude : undefined;
+}
+
 export function createAgentContextProvider(services: AppServices): Provider {
   const cache = new AgentContextCache();
 
@@ -100,6 +112,7 @@ export function createAgentContextProvider(services: AppServices): Provider {
       const messageText =
         typeof message.content?.text === "string" ? message.content.text : "";
       const scope = resolveAgentContextScope(messageText);
+      const messagePrelude = getDoolittleMessagePrelude(message);
       const roomKey = String(message.roomId ?? "global");
       const turnKey = String(
         message.id ?? `${roomKey}:${message.createdAt ?? Date.now()}`,
@@ -115,7 +128,9 @@ export function createAgentContextProvider(services: AppServices): Provider {
         };
       }
 
-      const cached = cache.getSession(roomKey, scope, now);
+      const cached = messagePrelude
+        ? undefined
+        : cache.getSession(roomKey, scope, now);
       if (cached) {
         return {
           text: cached.text,
@@ -135,6 +150,7 @@ export function createAgentContextProvider(services: AppServices): Provider {
         services,
         scope,
         repoSummary,
+        messagePrelude,
       );
 
       const text = sections.join("\n");
@@ -144,7 +160,11 @@ export function createAgentContextProvider(services: AppServices): Provider {
         data,
       };
 
-      cache.store(roomKey, turnKey, scope, nextCacheEntry);
+      if (messagePrelude) {
+        cache.storeTurn(turnKey, scope, nextCacheEntry);
+      } else {
+        cache.store(roomKey, turnKey, scope, nextCacheEntry);
+      }
 
       return {
         text,

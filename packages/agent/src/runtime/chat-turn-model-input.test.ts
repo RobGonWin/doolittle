@@ -104,7 +104,7 @@ describe("chat turn model input seam", () => {
     expect(built.messagePrelude).toContain("profile=coding");
     expect(built.messagePrelude).toContain("CODING CONTEXT");
     expect(built.messagePrelude).toContain("cwd=/workspace/demo");
-    expect(built.effectiveMessage).toEndWith(`User request:\n${message}`);
+    expect(built.effectiveMessage).toBe(message);
   });
 
   it("supports local synthesis prelude injection without response caching", () => {
@@ -144,7 +144,6 @@ describe("chat turn model input seam", () => {
     expect(assembly.requiresPreferredLocalIntentSynthesis).toBe(true);
     expect("responseCacheKey" in assembly).toBe(false);
     expect(built.messagePrelude).toContain(localSynthesisPrelude);
-    expect(built.effectiveMessage).toContain(localSynthesisPrelude);
-    expect(built.effectiveMessage).toEndWith(`User request:\n${message}`);
+    expect(built.effectiveMessage).toBe(message);
   });
 });

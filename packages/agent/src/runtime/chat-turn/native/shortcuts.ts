@@ -1,5 +1,6 @@
 import { ModelType } from "@elizaos/core";
 import type { AgentExecutionContext, AgentTurnHooks } from "@/runtime/chat";
+import { renderDoolittleSoulContext } from "@/runtime/soul";
 import type { TurnClassification } from "@/runtime/turn-classification/types";
 import { finalizeTurnResponse, isTurnReadinessMessage } from "../finalization";
 import type { TurnState } from "../state";
@@ -225,7 +226,7 @@ function isPresenceOrSmallTalkPrompt(message: string): boolean {
   );
 }
 
-function buildDirectInformationalPrompt(input: {
+export function buildDirectInformationalPrompt(input: {
   context: AgentExecutionContext;
   turn: TurnState;
   userId: string;
@@ -237,6 +238,8 @@ function buildDirectInformationalPrompt(input: {
     `You are ${input.turn.agentName}.`,
     "",
     ...buildCharacterVoiceContext(input.context),
+    "",
+    ...renderDoolittleSoulContext(input.context.config.workspaceDir),
     "",
     "Conversation contract:",
     "- Sound like a present conversational partner, not a product brochure.",
@@ -273,7 +276,9 @@ function buildDirectInformationalPrompt(input: {
   ].join("\n");
 }
 
-function normalizeDirectInformationalResponse(response: unknown): string {
+export function normalizeDirectInformationalResponse(
+  response: unknown,
+): string {
   if (typeof response !== "string") {
     return "";
   }

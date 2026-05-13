@@ -27,6 +27,7 @@ export async function runProviderModelTurn(
     context: AgentExecutionContext;
     turn: TurnState;
     effectiveMessage: string;
+    messagePrelude?: string;
     settingsBefore: ModelSettingsSnapshot;
     settingsDuring: ModelSettingsSnapshot;
     capabilityProfile: TurnCapabilityProfile;
@@ -53,6 +54,13 @@ export async function runProviderModelTurn(
       channelType: ChannelType.DM,
     },
   });
+  memory.metadata = {
+    ...(memory.metadata ?? {}),
+    doolittle: {
+      messagePrelude: input.messagePrelude ?? "",
+      rawMessage: input.effectiveMessage,
+    },
+  };
   return withProviderRuntimeLock(input.context.runtime, async () => {
     let response = "";
     let handledMessage = false;

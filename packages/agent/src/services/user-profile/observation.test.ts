@@ -16,6 +16,13 @@ describe("user-profile observation helpers", () => {
     expect(signals.isExplicitMemory).toBe(true);
   });
 
+  it("extracts explicit display name updates", () => {
+    expect(
+      parseUserObservation("Update my name to SYMBiEX, thanks").displayName,
+    ).toBe("SYMBiEX");
+    expect(parseUserObservation("My name is Alex.").displayName).toBe("Alex");
+  });
+
   it("extracts agent observation signals from labeled notes", () => {
     expect(
       parseAgentObservation("goal: keep Doolittle native and operator-friendly")

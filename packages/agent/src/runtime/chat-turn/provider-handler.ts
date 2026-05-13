@@ -61,6 +61,14 @@ function memoryText(memory: Memory): string {
   return typeof content?.text === "string" ? content.text : "";
 }
 
+function doolittleMessagePrelude(memory: Memory): string {
+  const metadata = memory.metadata as
+    | { doolittle?: { messagePrelude?: unknown } }
+    | undefined;
+  const prelude = metadata?.doolittle?.messagePrelude;
+  return typeof prelude === "string" ? prelude : "";
+}
+
 export async function executeProviderMessageTurn(
   input: ProviderMessageExecutionInput,
 ): Promise<ProviderMessageExecutionResult> {
@@ -69,6 +77,7 @@ export async function executeProviderMessageTurn(
   let runFailureMessage: string | undefined;
   const startedAt = performance.now();
   const prompt = memoryText(input.memory);
+  const messagePrelude = doolittleMessagePrelude(input.memory);
   const sessionId = input.sessionId ?? String(input.memory.roomId);
 
   recordTrajectoryEvent(input.context, {
@@ -85,6 +94,8 @@ export async function executeProviderMessageTurn(
       path: "provider-message-service",
       prompt,
       promptChars: prompt.length,
+      messagePrelude,
+      messagePreludeChars: messagePrelude.length,
       useMultiStep: input.derivedTurnPolicy.useMultiStep,
       maxIterations: input.derivedTurnPolicy.useMultiStep
         ? input.derivedTurnPolicy.maxIterations

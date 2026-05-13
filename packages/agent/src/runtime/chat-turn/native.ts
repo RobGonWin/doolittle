@@ -2,6 +2,10 @@ import type { AgentExecutionContext, AgentTurnHooks } from "@/runtime/chat";
 import type { ChatTurnRequest, CronJobRuntimeOverrides } from "@/types/runtime";
 import { executeApprovedDirectLocalIntent } from "./local-intent-orchestration/approval";
 import { runPreferredLocalIntentFastPath } from "./local-intent-orchestration/fast-path";
+import {
+  handleProfileMemoryModelTurn,
+  handleSoulIdentityModelTurn,
+} from "./native/profile-memory";
 import { runNativeProviderStage } from "./native/provider-stage";
 import { handleDirectInformationalModelTurn } from "./native/shortcuts";
 import type {
@@ -31,6 +35,34 @@ export async function runNativeMessageTurn(input: {
 }): Promise<string> {
   const turn = input.turnSetup.turn;
   const scheduleProfileObservation = input.turnSetup.scheduleProfileObservation;
+
+  const profileMemoryResponse = await handleProfileMemoryModelTurn({
+    context: input.context,
+    turn,
+    userId: input.effectiveInput.userId,
+    message: input.effectiveInput.message,
+    scheduleProfileObservation,
+    options: input.options,
+    perf: input.perf,
+    source: input.input.source,
+  });
+  if (profileMemoryResponse) {
+    return profileMemoryResponse;
+  }
+
+  const soulIdentityResponse = await handleSoulIdentityModelTurn({
+    context: input.context,
+    turn,
+    userId: input.effectiveInput.userId,
+    message: input.effectiveInput.message,
+    scheduleProfileObservation,
+    options: input.options,
+    perf: input.perf,
+    source: input.input.source,
+  });
+  if (soulIdentityResponse) {
+    return soulIdentityResponse;
+  }
 
   const directInformationalResponse = await handleDirectInformationalModelTurn({
     context: input.context,

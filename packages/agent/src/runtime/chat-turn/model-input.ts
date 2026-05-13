@@ -104,9 +104,7 @@ export function createModelInputAssembly(input: {
 
       return {
         messagePrelude,
-        effectiveMessage: messagePrelude
-          ? `${messagePrelude}\n\nUser request:\n${input.effectiveInput.message}`
-          : input.effectiveInput.message,
+        effectiveMessage: input.effectiveInput.message,
       };
     },
   };
