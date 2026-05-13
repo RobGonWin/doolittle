@@ -15,7 +15,7 @@ function createVersionSummary() {
     },
     nativePackages: {
       runtimeLatest: "2.0.0",
-      runtimeAlpha: "2.0.0-alpha.85",
+      runtimeAlpha: "2.0.0-alpha.537",
       aligned: 0,
       vendored: 0,
       alphaOnly: 0,

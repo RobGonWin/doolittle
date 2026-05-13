@@ -147,6 +147,32 @@ export async function handleAgentTurn(
         workspaceDir: context.config.workspaceDir,
       })
     : undefined;
+  if (!workflowCommand && trimmedMessage === "/retry") {
+    const replay = context.services.sessions.deleteLatestExchange(
+      preparedTurn.turn.sessionId,
+      {
+        skipSlashCommands: true,
+      },
+    );
+    if (!replay.userMessage) {
+      return "No prior conversational turn is available to retry.";
+    }
+    const retryInput = {
+      ...input,
+      message: replay.userMessage.text,
+    };
+    const retryTurn = prepareTurnState(retryInput, context);
+    perf.mark("retry-replay");
+    return runPostCommandTurn(
+      retryInput,
+      retryInput,
+      context,
+      options ?? {},
+      perf,
+      undefined,
+      retryTurn,
+    );
+  }
   const effectiveInput = workflowCommand
     ? {
         ...input,

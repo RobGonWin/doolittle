@@ -1,6 +1,10 @@
 import type { Database } from "bun:sqlite";
 import type { EventEmitter } from "node:events";
-import type { SessionSearchResult, StoredMessage } from "@/types";
+import type {
+  SessionExchangeMutationResult,
+  SessionSearchResult,
+  StoredMessage,
+} from "@/types";
 
 export interface SessionMessageActivityEvent {
   kind: "message";
@@ -133,4 +137,108 @@ export class SessionMessageStore {
   latest(limit: number): SessionSearchResult[] {
     return this.recent(limit);
   }
+
+  deleteLatestExchange(
+    sessionId: string,
+    options?: { skipSlashCommands?: boolean },
+  ): SessionExchangeMutationResult {
+    const user = this.latestUserMessage(sessionId, options);
+    if (!user) {
+      return {
+        sessionId,
+        assistantMessages: [],
+        deletedMessages: 0,
+      };
+    }
+
+    const nextUser = this.db
+      .query(
+        `
+          SELECT MIN(rowid) as rowid
+          FROM messages
+          WHERE session_id = ?1 AND role = 'user' AND rowid > ?2
+        `,
+      )
+      .get(sessionId, user.rowid) as { rowid: number | null } | null;
+    const nextUserRowId = nextUser?.rowid ?? null;
+    const rows = this.db
+      .query(
+        `
+          SELECT rowid, id, session_id as sessionId, room_id as roomId,
+            entity_id as entityId, role, text, created_at as createdAt
+          FROM messages
+          WHERE session_id = ?1
+            AND (
+              rowid = ?2
+              OR (
+                role = 'assistant'
+                AND rowid > ?2
+                AND (?3 IS NULL OR rowid < ?3)
+              )
+            )
+          ORDER BY rowid ASC
+        `,
+      )
+      .all(sessionId, user.rowid, nextUserRowId) as StoredMessageRow[];
+
+    const rowIds = rows.map((row) => row.rowid);
+    if (rowIds.length) {
+      const placeholders = rowIds.map(() => "?").join(", ");
+      this.db
+        .query(`DELETE FROM messages_fts WHERE rowid IN (${placeholders})`)
+        .run(...rowIds);
+      this.db
+        .query(`DELETE FROM messages WHERE rowid IN (${placeholders})`)
+        .run(...rowIds);
+    }
+
+    return {
+      sessionId,
+      userMessage: toStoredMessage(user),
+      assistantMessages: rows
+        .filter((row) => row.role === "assistant")
+        .map(toStoredMessage),
+      deletedMessages: rows.length,
+    };
+  }
+
+  private latestUserMessage(
+    sessionId: string,
+    options?: { skipSlashCommands?: boolean },
+  ): StoredMessageRow | undefined {
+    const row = this.db
+      .query(
+        `
+          SELECT rowid, id, session_id as sessionId, room_id as roomId,
+            entity_id as entityId, role, text, created_at as createdAt
+          FROM messages
+          WHERE session_id = ?1
+            AND role = 'user'
+            AND (?2 = 0 OR substr(ltrim(text), 1, 1) != '/')
+          ORDER BY rowid DESC
+          LIMIT 1
+        `,
+      )
+      .get(
+        sessionId,
+        options?.skipSlashCommands ? 1 : 0,
+      ) as StoredMessageRow | null;
+    return row ?? undefined;
+  }
+}
+
+interface StoredMessageRow extends StoredMessage {
+  rowid: number;
+}
+
+function toStoredMessage(row: StoredMessageRow): StoredMessage {
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    roomId: row.roomId,
+    entityId: row.entityId,
+    role: row.role,
+    text: row.text,
+    createdAt: row.createdAt,
+  };
 }

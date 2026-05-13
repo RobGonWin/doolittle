@@ -1,5 +1,6 @@
 import type { TrajectoryModelContext } from "../../types/trajectory";
 import type { SessionService } from "../session/service";
+import type { TrajectoryEventJournal } from "./event-journal";
 import {
   createTrajectoryServiceSlug,
   readTrajectoryServiceRecords,
@@ -14,6 +15,7 @@ export interface TrajectoryServiceHostSource {
   baseDir: string;
   sessions: SessionService;
   getModelContext?: () => TrajectoryModelContext;
+  eventJournal?: TrajectoryEventJournal;
   bindings: TrajectoryServiceHostBindings;
 }
 
@@ -25,6 +27,7 @@ export function buildTrajectoryServiceHosts(
     baseDir: source.baseDir,
     sessions: source.sessions,
     getModelContext: source.getModelContext,
+    eventJournal: source.eventJournal,
     slug: createTrajectoryServiceSlug,
     describeBundle: bindings.describeBundle.bind(bindings),
     replayBundle: bindings.replayBundle.bind(bindings),

@@ -13,7 +13,7 @@ export interface NativeCapabilityTruthRecord {
 const CAPABILITY_TRUTH: NativeCapabilityTruthRecord[] = [
   {
     id: "browser.browser",
-    packageName: "@elizaos/plugin-browser",
+    packageName: "doolittle:services.web",
     headline:
       "Browser capture is truthful about pixel versus placeholder output.",
     summary:
@@ -41,7 +41,7 @@ const CAPABILITY_TRUTH: NativeCapabilityTruthRecord[] = [
   },
   {
     id: "media.tts",
-    packageName: "@elizaos/plugin-tts",
+    packageName: "doolittle:services.media",
     headline:
       "TTS is a runtime adapter with explicit active versus degraded readiness.",
     summary:
@@ -63,7 +63,7 @@ const CAPABILITY_TRUTH: NativeCapabilityTruthRecord[] = [
   },
   {
     id: "research.autocoder",
-    packageName: "@elizaos/plugin-autocoder",
+    packageName: "@doolittle/plugin-autocoder",
     headline:
       "Autocoder remains experimental and planning-first until real mutation flows are fully implemented.",
     summary:

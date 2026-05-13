@@ -2,6 +2,7 @@ import type { getLinkedProviderAccountsSnapshot } from "@/runtime/native/account
 import type { ReviewResult, TransportName, WizardAnswers } from "../types";
 
 export interface LinkedProviderReadiness {
+  devin?: boolean;
   codex: boolean;
   claudeCode: boolean;
 }
@@ -10,6 +11,9 @@ export function getLinkedProviderReadiness(
   linkedAccounts: ReturnType<typeof getLinkedProviderAccountsSnapshot>,
 ): LinkedProviderReadiness {
   return {
+    devin: Boolean(
+      linkedAccounts.devin?.nativeReady || linkedAccounts.devin?.reusable,
+    ),
     codex: Boolean(
       linkedAccounts.codex.nativeReady || linkedAccounts.codex.reusable,
     ),
@@ -39,7 +43,14 @@ export function applyProviderFallbacks(
     !next.openaiApiKey.trim() &&
     !next.useLinkedCodexAuth
   ) {
-    if (readiness.codex) {
+    if (readiness.devin) {
+      next.provider = "devin";
+      next.useLinkedDevinAuth = true;
+      next.devinModel = next.devinModel || "swe-1-6-fast";
+      notices.push(
+        "No OPENAI_API_KEY was provided, so I switched the active mind to linked Devin.",
+      );
+    } else if (readiness.codex) {
       next.provider = "codex";
       next.useLinkedCodexAuth = true;
       next.openaiModel = next.openaiModel || "gpt-5.4";
@@ -78,6 +89,25 @@ export function applyProviderFallbacks(
         "No Anthropic key or linked Claude Code auth was available, so I left the mind dormant instead of writing a broken provider state.",
       );
     }
+  }
+
+  if (
+    next.provider === "devin" &&
+    !next.useLinkedDevinAuth &&
+    readiness.devin
+  ) {
+    next.useLinkedDevinAuth = true;
+  }
+
+  if (
+    next.provider === "devin" &&
+    !next.useLinkedDevinAuth &&
+    !readiness.devin
+  ) {
+    next.provider = "offline";
+    notices.push(
+      "Devin was selected without local CLI auth, so I left the mind dormant instead of writing a broken provider state.",
+    );
   }
 
   if (

@@ -1,4 +1,4 @@
-import { benchmarkConfig } from "@elizaos/plugin-action-bench";
+import { benchmarkConfig } from "@plugins/doolittle-plugin";
 
 import { getNativeServices } from "../runtime";
 import { getNativeExecutionControlPlane } from "./execution";

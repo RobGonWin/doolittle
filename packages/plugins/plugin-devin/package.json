@@ -1,0 +1,33 @@
+{
+  "name": "@elizaos/plugin-devin",
+  "version": "2.0.0-alpha.537",
+  "description": "Native-first ElizaOS provider plugin for linked Devin CLI SWE model execution.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src/**/*.ts",
+    "README.md"
+  ],
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "devin",
+    "swe",
+    "windsurf"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SYMBaiEX/doolittle.git",
+    "directory": "packages/plugins/plugin-devin"
+  },
+  "homepage": "https://github.com/SYMBaiEX/doolittle/tree/main/packages/plugins/plugin-devin",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@elizaos/core": "2.0.0-alpha.537"
+  }
+}

@@ -186,4 +186,40 @@ describe("session command router", () => {
       ),
     ).toContain('"sessionId": "session-2"');
   });
+
+  it("undoes the latest conversational exchange through session memory", async () => {
+    const context = {
+      services: {
+        sessions: {
+          deleteLatestExchange: (sessionId: string) => ({
+            sessionId,
+            userMessage: {
+              id: "msg-1",
+              sessionId,
+              roomId: "room-1",
+              entityId: "user-1",
+              role: "user",
+              text: "try the Doolittle-native loop",
+              createdAt: "2026-03-28T00:00:00.000Z",
+            },
+            assistantMessages: [],
+            deletedMessages: 2,
+          }),
+        },
+        gatewaySessions: {
+          get: () => undefined,
+        },
+      },
+    } as unknown as AgentExecutionContext;
+
+    const undone = await handleSessionCommand(
+      createInput({ message: "/undo" }),
+      "/undo",
+      "session-1",
+      context,
+    );
+
+    expect(undone).toContain("Undid the latest exchange");
+    expect(undone).toContain("try the Doolittle-native loop");
+  });
 });

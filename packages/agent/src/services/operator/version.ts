@@ -64,21 +64,15 @@ export function buildOperatorVersionSummary(
       "@elizaos/plugin-anthropic":
         packageMetadata.dependencies?.["@elizaos/plugin-anthropic"] ??
         "unknown",
-      "@elizaos/plugin-browser":
-        packageMetadata.dependencies?.["@elizaos/plugin-browser"] ?? "unknown",
-      "@elizaos/plugin-tts":
-        packageMetadata.dependencies?.["@elizaos/plugin-tts"] ?? "unknown",
       "@elizaos/plugin-e2b":
         packageMetadata.dependencies?.["@elizaos/plugin-e2b"] ?? "unknown",
       "@elizaos/plugin-forms":
         packageMetadata.dependencies?.["@elizaos/plugin-forms"] ?? "unknown",
-      "@elizaos/plugin-mcp":
-        packageMetadata.dependencies?.["@elizaos/plugin-mcp"] ?? "unknown",
-      "@elizaos/plugin-action-bench":
-        packageMetadata.dependencies?.["@elizaos/plugin-action-bench"] ??
+      "@doolittle/plugin-action-bench":
+        packageMetadata.dependencies?.["@doolittle/plugin-action-bench"] ??
         "unknown",
-      "@elizaos/plugin-autocoder":
-        packageMetadata.dependencies?.["@elizaos/plugin-autocoder"] ??
+      "@doolittle/plugin-autocoder":
+        packageMetadata.dependencies?.["@doolittle/plugin-autocoder"] ??
         "unknown",
     },
     nativePlugins: {

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import type { NativeCapabilityTruthRecord } from "../../packages/agent/src/runtime/native/capability-truth";
+import type { OperatorWowContractPillar } from "../../packages/agent/src/runtime/native/operator-wow-contract";
 import {
   renderCapabilityTruth,
+  renderOperatorWowContract,
   renderPluginInventory,
   renderPluginReadme,
 } from "./render";
@@ -39,6 +41,59 @@ const sampleTruth: NativeCapabilityTruthRecord = {
   caveats: ["Pixel capture is a lightweight raster card."],
 };
 
+const sampleWowPillar: OperatorWowContractPillar = {
+  id: "terminal-operator-loop",
+  title: "Terminal Operator Loop",
+  outcome:
+    "The everyday shell feels like a live operator console with slash control, streaming tool progress, interruption, and recovery.",
+  doolittleOpenClawSignals: [
+    "Doolittle has a dense terminal loop with streaming tool output.",
+    "OpenClaw exposes chat commands across channels.",
+  ],
+  elizaosLeverage: [
+    "ElizaOS message handling remains the natural-language route.",
+    "ElizaOS events provide action progress.",
+  ],
+  doolittleSurfaces: [
+    "packages/agent/src/runtime/chat.ts",
+    "packages/agent/src/cli.ts",
+  ],
+  acceptanceScenarios: [
+    {
+      id: "terminal-operator-loop.command-deck",
+      surface: "plain CLI",
+      trigger: "Run `/status` inside `doolittle`.",
+      requiredSignals: [
+        "Returns a compact operator result.",
+        "Names degraded components.",
+        "Stays on the runtime lane.",
+      ],
+      verification: [
+        "Add command parser coverage.",
+        "Run `bun test packages/agent/src/runtime`.",
+      ],
+      currentStatus: "partial",
+    },
+  ],
+  currentGaps: [
+    "Retry and undo are not first-class commands.",
+    "Interrupt semantics need a dedicated test.",
+  ],
+  nextImplementationTasks: [
+    {
+      id: "operator-command-native experience",
+      title: "Promote retry and undo into slash commands.",
+      ownerSurface: "operator shell",
+      files: ["packages/agent/src/runtime/chat.ts", "docs/operator-loop.md"],
+      definitionOfDone: [
+        "Commands have parser coverage.",
+        "Unavailable runtime support returns a degraded response.",
+        "Operator docs match the tested output.",
+      ],
+    },
+  ],
+};
+
 describe("sync-doc-truth renderers", () => {
   it("renders inventory tables with escaped notes", () => {
     const output = renderPluginInventory([sampleRow]);
@@ -69,6 +124,19 @@ describe("sync-doc-truth renderers", () => {
     expect(output).toContain("## Runtime Contract");
     expect(output).toContain(
       "- Canonical capability truth: `docs/capability-truth.md`",
+    );
+  });
+
+  it("renders the operator wow contract with scenarios and tasks", () => {
+    const output = renderOperatorWowContract([sampleWowPillar]);
+
+    expect(output).toContain("# Operator Wow Contract");
+    expect(output).toContain("## Terminal Operator Loop");
+    expect(output).toContain("#### terminal-operator-loop.command-deck");
+    expect(output).toContain("- Current status: `partial`");
+    expect(output).toContain("#### operator-command-native experience");
+    expect(output).toContain(
+      "`packages/agent/src/runtime/chat.ts`, `docs/operator-loop.md`",
     );
   });
 });

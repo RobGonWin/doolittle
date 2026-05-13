@@ -10,6 +10,10 @@ import {
   refreshLinkedClaudeCodeCredentials,
   refreshLinkedCodexCredentials,
 } from "../account-auth";
+import {
+  createLocalOllamaEmbeddingPlugin,
+  createLocalOllamaModelsPlugin,
+} from "./local-ollama";
 import { normalizePlugin, shouldIncludeDirectProviderPlugin } from "./support";
 
 export async function loadProviderPlugins(
@@ -28,11 +32,13 @@ export async function loadProviderPlugins(
     { pdfPlugin },
     { createCodexPlugin },
     { createClaudeCodePlugin },
+    { createDevinPlugin },
   ] = await Promise.all([
     import("@elizaos/plugin-sql"),
     import("@elizaos/plugin-pdf"),
     import("@elizaos/plugin-codex"),
     import("@elizaos/plugin-claude-code"),
+    import("@elizaos/plugin-devin"),
   ]);
 
   const providers: Plugin[] = [
@@ -50,6 +56,14 @@ export async function loadProviderPlugins(
       getStatus: () => getLinkedProviderAccountsSnapshot().claudeCode,
       getCredentials: () => getLinkedClaudeCodeCredentials(),
       refreshCredentials: () => refreshLinkedClaudeCodeCredentials(),
+    }),
+    createDevinPlugin({
+      enabled: selectedProvider === "devin",
+      command: config.devinCliCommand,
+      model: config.devinModel,
+      timeoutMs: config.devinTimeoutMs,
+      cwd: config.workspaceDir,
+      getStatus: () => getLinkedProviderAccountsSnapshot().devin,
     }),
   ];
 
@@ -76,6 +90,26 @@ export async function loadProviderPlugins(
         getCredentials: () => getLinkedElizaCloudCredentials(),
       }),
     );
+  }
+
+  if (selectedProvider === "ollama") {
+    const { default: ollamaPlugin } = await import("@elizaos/plugin-ollama");
+    const normalizedOllamaPlugin = normalizePlugin(ollamaPlugin);
+    providers.push(
+      {
+        ...normalizedOllamaPlugin,
+        models: {},
+      },
+      createLocalOllamaModelsPlugin(config),
+    );
+  }
+
+  if (
+    selectedProvider !== "ollama" &&
+    !enableCloudEmbeddings &&
+    config.ollamaApiEndpoint?.trim()
+  ) {
+    providers.push(createLocalOllamaEmbeddingPlugin(config));
   }
 
   const optionalProviderImports: Promise<Plugin | null>[] = [];

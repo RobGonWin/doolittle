@@ -8,8 +8,8 @@ describe("native package audit", () => {
     const audit = getNativePackageAudit({} as EnvConfig);
 
     expect(getLatestRuntimeLine()).toMatchObject({
-      alpha: "2.0.0-alpha.85",
-      latest: "2.0.0-alpha.77",
+      alpha: "2.0.0-alpha.537",
+      latest: "1.7.2",
     });
     expect(audit.packages.length).toBeGreaterThan(20);
     expect(audit.summary.alphaOnly).toBe(
@@ -33,6 +33,6 @@ describe("native package audit", () => {
     expect(snapshot).not.toBe(original);
     expect(original.length).toBeGreaterThan(snapshot.length);
     expect(original[0]?.packageName).toBe("elizaos");
-    expect(original.at(-1)?.packageName).toBe("@elizaos/plugin-autocoder");
+    expect(original.at(-1)?.packageName).toBe("@doolittle/plugin-autocoder");
   });
 });

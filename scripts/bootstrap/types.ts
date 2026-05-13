@@ -19,6 +19,8 @@ export type WizardMode = "quick" | "ritual";
 
 export type ProviderMode =
   | "elizacloud"
+  | "devin"
+  | "ollama"
   | "openai"
   | "anthropic"
   | "codex"
@@ -130,6 +132,7 @@ export interface OnboardingSummary {
   provider: ProviderMode;
   accounts: {
     elizaCloudLinked: boolean;
+    devinLinked?: boolean;
     codexLinked: boolean;
     claudeCodeLinked: boolean;
   };
@@ -198,11 +201,19 @@ export interface WizardAnswers {
   openaiApiKey: string;
   useLinkedCodexAuth: boolean;
   openaiModel: string;
+  useLinkedDevinAuth?: boolean;
+  devinCliCommand?: string;
+  devinModel?: string;
+  devinTimeoutMs?: number;
   elizaCloudApiKey: string;
   elizaCloudEnabled: boolean;
   elizaCloudSmallModel: string;
   elizaCloudModel: string;
   elizaCloudEmbeddingModel: string;
+  ollamaApiEndpoint: string;
+  ollamaSmallModel: string;
+  ollamaLargeModel: string;
+  ollamaEmbeddingModel: string;
   anthropicApiKey: string;
   useLinkedClaudeCodeAuth: boolean;
   claudeCodeCliFallback: boolean;

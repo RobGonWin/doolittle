@@ -1,9 +1,11 @@
+import type { TrajectoryEventJournal } from "../event-journal";
 import type { TrajectoryService } from "../service";
 import type { TrajectoryServiceHosts } from "../service-support";
 
 interface TrajectoryServiceState {
   baseDir: string;
   hosts: TrajectoryServiceHosts;
+  eventJournal: TrajectoryEventJournal;
 }
 
 const trajectoryServiceState = new WeakMap<

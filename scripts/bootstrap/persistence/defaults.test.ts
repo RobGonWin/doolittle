@@ -15,7 +15,8 @@ describe("bootstrap persistence defaults", () => {
     const settings = createDefaultSettings(DEFAULT_TUI_THEME);
     const gateway = createDefaultGatewayConfig(true, "pair");
 
-    expect(settings.model.model).toBe("gpt-5.4");
+    expect(settings.model.provider).toBe("devin");
+    expect(settings.model.model).toBe("swe-1-6-fast");
     expect(settings.agent.maxIterations).toBeGreaterThan(0);
     expect(gateway.allowAllUsers).toBe(true);
     expect(gateway.platforms.api.enabled).toBe(true);

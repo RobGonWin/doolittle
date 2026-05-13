@@ -8,30 +8,6 @@ type ChatRuntimeContext = Pick<
   gateway?: AppContext["gateway"];
 };
 
-export function buildSimpleGreetingReply(message: string): string {
-  const normalized = message.trim().toLowerCase();
-  if (
-    normalized === "how are you" ||
-    normalized === "how are you today" ||
-    normalized === "how are you doing" ||
-    normalized === "how are you doing today" ||
-    normalized === "how's it going" ||
-    normalized === "how are things"
-  ) {
-    return "Doing well. What do you want to work on?";
-  }
-  if (normalized === "thanks" || normalized === "thank you") {
-    return "Sure. What's next?";
-  }
-  if (normalized.startsWith("yo")) {
-    return "Yo. What do you want to work on?";
-  }
-  if (normalized.startsWith("howdy")) {
-    return "Howdy. What can I help you with?";
-  }
-  return "Hey! What can I help you with?";
-}
-
 export function isRecoverableNativePlanningError(error: unknown): boolean {
   const detail =
     error instanceof Error ? error.message.trim() : String(error).trim();

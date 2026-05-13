@@ -44,11 +44,11 @@ export async function runPostProviderTurn(
   return finalizePostProviderTurn({
     context: input.context,
     turn: input.turn,
-    responseCacheKey: input.responseCacheKey,
     finalResponse,
     runFailureMessage: fallbackResult.runFailureMessage,
     observedActionCount: fallbackResult.observedActionCount,
     usedFallback: fallbackResult.usedFallback,
+    settingsDuring: input.settingsDuring,
     scheduleProfileObservation: input.scheduleProfileObservation,
   });
 }

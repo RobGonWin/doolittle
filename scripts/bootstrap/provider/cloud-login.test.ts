@@ -92,6 +92,7 @@ describe("runElizaCloudLoginFlow", () => {
 
   it("continues on auth-gated availability and reports create-session errors", async () => {
     const { context, sectionCalls, warnCalls } = createContext();
+    const openBrowser = mock(async () => true);
 
     mock.module("@elizaos/autonomous/runtime/cloud-onboarding", () => ({
       checkCloudAvailability: async () => "HTTP 401",
@@ -115,9 +116,15 @@ describe("runElizaCloudLoginFlow", () => {
     );
 
     const { runElizaCloudLoginFlow } = await loadFlowModule();
-    const apiKey = await runElizaCloudLoginFlow(context, "Eliza Cloud login");
+    const apiKey = await runElizaCloudLoginFlow(
+      context,
+      "Eliza Cloud login",
+      undefined,
+      { openBrowser },
+    );
 
     expect(apiKey).toBeUndefined();
+    expect(openBrowser).not.toHaveBeenCalled();
     expect(sectionCalls[0]).toEqual({
       title: "Binding",
       detail: "Eliza Cloud login",
@@ -134,6 +141,7 @@ describe("runElizaCloudLoginFlow", () => {
 
   it("returns undefined when availability reports a hard blocking condition", async () => {
     const { context, sectionCalls } = createContext();
+    const openBrowser = mock(async () => true);
 
     mock.module("@elizaos/autonomous/runtime/cloud-onboarding", () => ({
       checkCloudAvailability: async () =>
@@ -154,9 +162,15 @@ describe("runElizaCloudLoginFlow", () => {
     );
 
     const { runElizaCloudLoginFlow } = await loadFlowModule();
-    const apiKey = await runElizaCloudLoginFlow(context, "Eliza Cloud login");
+    const apiKey = await runElizaCloudLoginFlow(
+      context,
+      "Eliza Cloud login",
+      undefined,
+      { openBrowser },
+    );
 
     expect(apiKey).toBeUndefined();
+    expect(openBrowser).not.toHaveBeenCalled();
     expect(sectionCalls[0]).toEqual({
       title: "Binding",
       detail: "Eliza Cloud login",
@@ -168,6 +182,7 @@ describe("runElizaCloudLoginFlow", () => {
 
   it("warns and returns undefined when polling reaches missing session", async () => {
     const { context, warnCalls } = createContext();
+    const openBrowser = mock(async () => true);
 
     mock.module("@elizaos/autonomous/runtime/cloud-onboarding", () => ({
       checkCloudAvailability: async () => undefined,
@@ -197,10 +212,13 @@ describe("runElizaCloudLoginFlow", () => {
 
     const { runElizaCloudLoginFlow } = await loadFlowModule();
     const apiKey = await withPatchedSetTimeout(() =>
-      runElizaCloudLoginFlow(context, "Eliza Cloud login"),
+      runElizaCloudLoginFlow(context, "Eliza Cloud login", undefined, {
+        openBrowser,
+      }),
     );
 
     expect(apiKey).toBeUndefined();
+    expect(openBrowser).toHaveBeenCalledTimes(1);
     expect(warnCalls[0]).toContain("Auth session expired or not found");
     expect(restoreWizardScreen).toHaveBeenCalledTimes(1);
 
@@ -209,6 +227,7 @@ describe("runElizaCloudLoginFlow", () => {
 
   it("warns when polling never reaches authentication before timeout", async () => {
     const { context, warnCalls } = createContext();
+    const openBrowser = mock(async () => true);
 
     mock.module("@elizaos/autonomous/runtime/cloud-onboarding", () => ({
       checkCloudAvailability: async () => undefined,
@@ -235,10 +254,13 @@ describe("runElizaCloudLoginFlow", () => {
 
     const { runElizaCloudLoginFlow } = await loadFlowModule();
     const apiKey = await withPatchedSetTimeoutAndVirtualTime(() =>
-      runElizaCloudLoginFlow(context, "Eliza Cloud login"),
+      runElizaCloudLoginFlow(context, "Eliza Cloud login", undefined, {
+        openBrowser,
+      }),
     );
 
     expect(apiKey).toBeUndefined();
+    expect(openBrowser).toHaveBeenCalledTimes(1);
     expect(warnCalls[0]).toContain("Cloud login timed out");
     expect(restoreWizardScreen).toHaveBeenCalledTimes(1);
 

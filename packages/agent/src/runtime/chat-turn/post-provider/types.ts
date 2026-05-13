@@ -16,7 +16,6 @@ export interface PostProviderTurnInput {
   response: string;
   runFailureMessage?: string;
   settingsDuring: PostProviderSettingsSnapshot;
-  responseCacheKey?: string;
   scheduleProfileObservation: () => void;
   loadDirectLocalIntent: () => Promise<DirectLocalIntentLoader>;
   approveDirectLocalIntent: (

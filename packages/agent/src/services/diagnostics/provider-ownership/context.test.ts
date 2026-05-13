@@ -29,6 +29,10 @@ function buildConfig() {
     offlineBootstrapMode: false,
     elizaCloudEnabled: false,
     elizaCloudEmbeddingModel: "openai/text-embedding-3-small",
+    ollamaApiEndpoint: "http://localhost:11434/api",
+    ollamaSmallModel: "granite4.1:3b",
+    ollamaLargeModel: "granite4.1:3b",
+    ollamaEmbeddingModel: "nomic-embed-text:latest",
     elizaCloudEmbeddingApiKey: undefined,
     elizaCloudEmbeddingUrl: undefined,
     elizaCloudEmbeddingDimensions: 1536,
@@ -44,8 +48,8 @@ const linkedAccounts = getLinkedProviderAccountsSnapshot(
 
 const nativeAudit = {
   runtime: {
-    alpha: "2.0.0-alpha.77",
-    latest: "2.0.0-alpha.88",
+    alpha: "2.0.0-alpha.537",
+    latest: "1.7.2",
     date: "2026-04-01",
   },
   packages: [],

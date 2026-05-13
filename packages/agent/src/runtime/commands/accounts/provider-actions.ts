@@ -4,11 +4,12 @@ import {
   formatLinkedAccountSummary,
   formatLinkedProviderAdviceAlternate,
   formatLinkedProviderAdviceNextStep,
+  type LinkedProviderName,
 } from "@/runtime/linked-provider-accounts";
 import type { AccountsCommandContext } from "./types";
 
 export function formatProviderActivation(
-  provider: "elizacloud" | "codex" | "claude-code",
+  provider: LinkedProviderName,
   context: AccountsCommandContext,
 ): string {
   const activated = activateLinkedProvider(context, provider);
@@ -26,7 +27,7 @@ export function formatProviderActivation(
 }
 
 export async function formatProviderConnection(
-  provider: "elizacloud" | "codex" | "claude-code",
+  provider: LinkedProviderName,
   context: AccountsCommandContext,
 ): Promise<string> {
   const result = await connectLinkedProvider(context, provider);

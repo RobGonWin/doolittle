@@ -14,13 +14,5 @@ export async function loadDeferredMessagingPlugins({
     messaging.push(normalizePlugin(telegramPlugin));
   }
 
-  const { createDiscordPlugin } = await import("@elizaos/plugin-discord");
-  messaging.push(
-    createDiscordPlugin({
-      enabled: Boolean(config.discordBotToken),
-      tokenConfigured: Boolean(config.discordBotToken),
-    }),
-  );
-
   return messaging;
 }

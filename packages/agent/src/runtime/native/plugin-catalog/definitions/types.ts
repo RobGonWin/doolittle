@@ -6,8 +6,10 @@ import type {
 export type NativePluginEnablement =
   | "always"
   | "elizaCloud"
+  | "ollama"
   | "codex"
   | "claudeCode"
+  | "devin"
   | "openai"
   | "anthropic"
   | "telegram"

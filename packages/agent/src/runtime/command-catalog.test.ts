@@ -19,6 +19,17 @@ describe("command catalog", () => {
           entry.command === "/workspace-tree" && entry.category === "workspace",
       ),
     ).toBe(true);
+    expect(
+      COMMAND_CATALOG.some(
+        (entry) => entry.command === "/retry" && entry.category === "runtime",
+      ),
+    ).toBe(true);
+    expect(
+      COMMAND_CATALOG.some(
+        (entry) =>
+          entry.command === "/todo-list" && entry.category === "runtime",
+      ),
+    ).toBe(true);
   });
 
   it("suggests relevant commands from the split static catalog", () => {

@@ -13,6 +13,9 @@ export function resolveDefaultProviderModel(
   if (provider === "elizacloud") {
     return context.config.elizaCloudLargeModel;
   }
+  if (provider === "devin") {
+    return context.config.devinModel;
+  }
   return "claude-sonnet-4.6";
 }
 
@@ -24,6 +27,9 @@ export function resolveDefaultProviderBaseUrl(
   }
   if (provider === "elizacloud") {
     return resolveCloudApiBaseUrl();
+  }
+  if (provider === "devin") {
+    return "";
   }
   return "";
 }
@@ -63,6 +69,11 @@ export function syncProviderSettings(
     context.runtime.setSetting("ANTHROPIC_SMALL_MODEL", model);
     context.runtime.setSetting("ANTHROPIC_LARGE_MODEL", model);
     context.runtime.setSetting("ANTHROPIC_BASE_URL", baseUrl);
+    return;
+  }
+
+  if (provider === "devin") {
+    context.runtime.setSetting("DEVIN_MODEL", model);
     return;
   }
 

@@ -38,7 +38,11 @@ export function applyLinkedProviderSettings(
     settings.ELIZAOS_CLOUD_ENABLED = "true";
     settings.ELIZAOS_CLOUD_BASE_URL =
       linkedElizaCloud.baseUrl || config.elizaCloudBaseUrl;
-  } else if (config.elizaCloudApiKey) {
+  } else if (
+    config.elizaCloudEnabled &&
+    modelProvider === "elizacloud" &&
+    config.elizaCloudApiKey
+  ) {
     settings.ELIZAOS_CLOUD_API_KEY = config.elizaCloudApiKey;
   }
 

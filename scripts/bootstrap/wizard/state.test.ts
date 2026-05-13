@@ -20,6 +20,14 @@ const linkedAccounts = {
     fallbackReady: true,
     detail: "claude",
   },
+  devin: {
+    provider: "devin",
+    available: false,
+    reusable: false,
+    nativeReady: false,
+    fallbackReady: false,
+    detail: "devin",
+  },
   elizaCloud: {
     provider: "elizacloud",
     available: false,
@@ -30,6 +38,12 @@ const linkedAccounts = {
 
 describe("bootstrap wizard state helpers", () => {
   it("resolves the interactive provider default from environment precedence", () => {
+    expect(resolveInteractiveProviderDefault(new Map())).toBe("ollama");
+    expect(
+      resolveInteractiveProviderDefault(
+        new Map([["OLLAMA_API_ENDPOINT", "http://127.0.0.1:11434/api"]]),
+      ),
+    ).toBe("ollama");
     expect(
       resolveInteractiveProviderDefault(
         new Map([

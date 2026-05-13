@@ -559,7 +559,7 @@ Doolittle ships with a large service graph, but it no longer blocks the shell on
 |---|---|---|
 | Delegation queue | [`delegation/service.ts`](./packages/agent/src/services/delegation/service.ts) | `/delegate create`, `/delegate spawn`, `/delegate execute`, `/delegate supervise` |
 | Run controller and observed progress | [`run-controller-service.ts`](./packages/agent/src/services/run-controller-service.ts) | `/mode`, `/progress`, automatic live run state |
-| Trajectory research | [`trajectory/service.ts`](./packages/agent/src/services/trajectory/service.ts) | `/trajectories export`, `/trajectories bundle`, `/trajectories analyze`, `/trajectories evaluate`, `/trajectories replay` |
+| Trajectory research | [`trajectory/service/index.ts`](./packages/agent/src/services/trajectory/service/index.ts) | `/trajectories export`, `/trajectories bundle`, `/trajectories analyze`, `/trajectories evaluate`, `/trajectories replay` |
 | Planning boards | [`plugin-planning`](./packages/plugins/plugin-planning/) | `/planning` flows |
 | Cron scheduling | [`cron/service.ts`](./packages/agent/src/services/cron/service.ts) | `/cron list`, `/cron create every 2h \| name:deploy-review :: summarize logs` |
 
@@ -629,11 +629,14 @@ Doolittle doesn't lock you to one inference path.
 
 | Provider | What it does |
 |---|---|
-| **Eliza Cloud** | Managed inference — cleanest onboarding, least friction |
+| **Local Ollama** | Default local/self-hosted inference through `@elizaos/plugin-ollama` |
+| **Eliza Cloud** | Optional managed ElizaOS inference when you want a cloud path |
 | **Codex** | Reuses your local Codex CLI login for OpenAI routing |
 | **Claude Code** | Reuses your local Claude Code OAuth for Anthropic routing |
 | **OpenAI API key** | Direct `OPENAI_API_KEY` via `@elizaos/plugin-openai` |
 | **Anthropic API key** | Direct `ANTHROPIC_API_KEY` via `@elizaos/plugin-anthropic` |
+
+The installer and headless bootstrap default to Ollama at `http://localhost:11434/api` with `granite4.1:3b` for small/large text routing and `nomic-embed-text:latest` for embeddings. Eliza Cloud remains available through setup and account commands, but Doolittle no longer requires it for day-one inference.
 
 Switch live from the plain shell or the cockpit:
 
@@ -669,6 +672,7 @@ Canonical inventory and capability truth now live in:
 
 - [`docs/plugin-inventory.md`](./docs/plugin-inventory.md)
 - [`docs/capability-truth.md`](./docs/capability-truth.md)
+- [`docs/operator-wow-contract.md`](./docs/operator-wow-contract.md)
 
 The runtime endpoint remains:
 
@@ -677,9 +681,10 @@ The runtime endpoint remains:
 | Package | Role |
 |---|---|
 | `@elizaos/core` | Core runtime, message pipeline, character model, action/provider/evaluator contracts |
+| `@elizaos/plugin-ollama` | Official local/self-hosted Ollama provider — default native provider path during onboarding |
 | `@elizaos/plugin-openai` | Official OpenAI provider for API-key-backed GPT-family model routing |
 | `@elizaos/plugin-anthropic` | Official Anthropic provider for API-key-backed Claude-family model routing |
-| `@elizaos/plugin-elizacloud` | Eliza Cloud managed inference — default native provider path during onboarding |
+| `@elizaos/plugin-elizacloud` | Eliza Cloud managed inference — optional managed native provider path |
 | `@elizaos/plugin-codex` | Linked-account provider reusing local Codex CLI login state |
 | `@elizaos/plugin-claude-code` | Linked-account provider reusing local Claude Code OAuth state |
 | `@elizaos/plugin-pdf` | Official PDF service plugin for document extraction |
@@ -837,9 +842,13 @@ Everything the cockpit can do. Use these from the TUI input or the plain CLI:
 
 **Trajectories**
 
+Trajectory exports include both conversation messages and the durable event journal for turn classification, run progress, model calls, tool starts/completions, shell output, failures, and timings. RL-ready exports stay message-only so training windows do not get polluted by telemetry records.
+
 - `/trajectories list`
 - `/trajectories export`
 - `/trajectories export session:room-123 role:user limit:50`
+- `/trajectories export kind:event category:model limit:100`
+- `/trajectories export events:false session:room-123`
 - `/trajectories bundle`
 - `/trajectories bundle session:room-123`
 - `/trajectories analyze`
@@ -953,6 +962,18 @@ Copy `.env.example` to `.env` and fill in what you need.
 | `DOOLITTLE_MAX_ITERATIONS` | Explicit iteration limit (overrides run depth preset) | Per depth preset |
 | `DOOLITTLE_TOOL_PROGRESS` | Tool progress display: `off`, `new`, `all`, `verbose` | `new` |
 
+### Local Ollama
+
+| Variable | Purpose |
+|---|---|
+| `OLLAMA_API_ENDPOINT` | Ollama API endpoint used by the official ElizaOS Ollama plugin. Default: `http://localhost:11434/api` |
+| `OLLAMA_SMALL_MODEL` | Local small-model identifier. Default: `granite4.1:3b` |
+| `OLLAMA_LARGE_MODEL` | Local large-model identifier. Default: `granite4.1:3b` |
+| `OLLAMA_EMBEDDING_MODEL` | Local embedding-model identifier. Default: `nomic-embed-text:latest` |
+| `DOOLITTLE_EMBEDDING_PROVIDER` | Embedding provider selector. Default: `local` |
+
+For the default local path, run `ollama serve`, `ollama pull granite4.1:3b`, and `ollama pull nomic-embed-text:latest` before the first live prompt. `doolittle setup` can change the endpoint or model names later.
+
 ### Eliza Cloud
 
 | Variable | Purpose |
@@ -967,7 +988,7 @@ Copy `.env.example` to `.env` and fill in what you need.
 | `ELIZAOS_CLOUD_EMBEDDING_API_KEY` | Optional dedicated API key for Eliza Cloud embeddings. Falls back to `ELIZAOS_CLOUD_API_KEY` |
 | `ELIZAOS_CLOUD_EMBEDDING_DIMENSIONS` | Optional embedding dimension override for `text-embedding-3` models |
 
-Doolittle uses a stable per-session conversation id with Eliza Cloud so managed xAI-backed runs can benefit from provider-side prompt caching when the upstream supports cached prompt tokens.
+Doolittle uses a stable per-session conversation id with Eliza Cloud so managed xAI-backed runs can benefit from provider-side prompt caching when the upstream supports cached prompt tokens. This path is optional; the default bootstrap path is local Ollama.
 
 ### OpenAI
 
@@ -1256,7 +1277,7 @@ Tracks the ElizaOS alpha line:
 - `elizaos: "alpha"` — umbrella package
 - `@elizaos/core: "alpha"` — core runtime
 - `@elizaos/plugin-sql: "alpha"` — database adapter
-- `@elizaos/plugin-openai`, `@elizaos/plugin-anthropic` — provider plugins
+- `@elizaos/plugin-ollama`, `@elizaos/plugin-openai`, `@elizaos/plugin-anthropic` — provider plugins
 - `@elizaos/autonomous: "alpha"`, `@elizaos/skills: "alpha"` — alignment packages
 
 Features not covered by official ElizaOS packages are implemented as custom actions, providers, evaluators, and Bun-native services. Official packages not yet compatible on the current runtime line are vendored under `packages/plugins/*` and implemented directly against the current `@elizaos/core` alpha service model.

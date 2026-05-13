@@ -3,7 +3,7 @@ import type { NativePluginCatalogSeed } from "./types";
 export const RESEARCH_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
   {
     id: "research.action-bench",
-    packageName: "@elizaos/plugin-action-bench",
+    packageName: "@doolittle/plugin-action-bench",
     category: "research",
     source: "vendored",
     kind: "vendored",
@@ -14,7 +14,7 @@ export const RESEARCH_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
   },
   {
     id: "research.autocoder",
-    packageName: "@elizaos/plugin-autocoder",
+    packageName: "@doolittle/plugin-autocoder",
     category: "research",
     source: "vendored",
     kind: "adapter",

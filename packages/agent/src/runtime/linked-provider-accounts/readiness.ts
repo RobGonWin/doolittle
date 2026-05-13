@@ -97,7 +97,7 @@ async function computeProviderReadinessMessage(
   if (provider === "offline") {
     message = context.config.offlineBootstrapMode
       ? undefined
-      : `No active model provider is configured. Run \`${displayCommand("/accounts")}\` to bind Eliza Cloud, Codex, or Claude Code, or set \`DOOLITTLE_OFFLINE_BOOTSTRAP=true\` for explicit bootstrap-only fallback replies.`;
+      : `No active model provider is configured. Run \`${displayCommand("/accounts")}\` to bind Eliza Cloud, Codex, Claude Code, or Devin, or set \`DOOLITTLE_OFFLINE_BOOTSTRAP=true\` for explicit bootstrap-only fallback replies.`;
     cacheProviderReadiness(runtimeKey, provider, message);
     return message;
   }
@@ -178,6 +178,23 @@ async function computeProviderReadinessMessage(
         return message;
       }
       message = `Claude Code is selected, but no native Claude Code credentials are available. Run \`claude auth login\` or \`claude setup-token\`, then \`${displayCommand("/accounts connect claude-code")}\` to bind it in Eliza.`;
+      cacheProviderReadiness(runtimeKey, provider, message);
+      return message;
+    }
+  }
+
+  if (provider === "devin") {
+    const devinStatus = snapshot.devin;
+    const credentials = await resolveLinkedProviderCredentials("devin");
+    const command =
+      credentials && "command" in credentials
+        ? credentials.command?.trim()
+        : "";
+    if (!command) {
+      message =
+        devinStatus.nativeReady || devinStatus.reusable
+          ? `Devin is selected, but the local CLI binding still looks incomplete. Run \`${displayCommand("/accounts connect devin")}\` to rebind it, or run \`devin auth login\` first if the local session is stale.`
+          : `Devin is selected, but no active Devin CLI login is available. Run \`devin auth login\`, then \`${displayCommand("/accounts connect devin")}\` to bind SWE model execution.`;
       cacheProviderReadiness(runtimeKey, provider, message);
       return message;
     }

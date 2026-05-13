@@ -100,7 +100,7 @@ export interface MediaGenerationBundle {
 }
 
 export interface MediaModelContext {
-  provider: "openai" | "anthropic" | "offline";
+  provider: "openai" | "anthropic" | "ollama" | "offline";
   model: string;
   baseUrl: string;
   temperature: number;

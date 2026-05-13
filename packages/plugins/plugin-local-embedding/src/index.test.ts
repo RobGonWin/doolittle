@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { IAgentRuntime, Plugin } from "@elizaos/core";
+import { type IAgentRuntime, ModelType, type Plugin } from "@elizaos/core";
 import { stableHashVector } from "./hash";
 import createLocalEmbeddingPlugin from "./index";
 
@@ -49,8 +49,21 @@ describe("local embedding plugin", () => {
     });
 
     const embedded = service.embed("hello world", 8);
+    const modelEmbedding = await plugin.models?.[ModelType.TEXT_EMBEDDING]?.(
+      {} as IAgentRuntime,
+      {
+        text: "hello world",
+      },
+    );
 
     expect(embedded).toHaveLength(8);
+    expect(modelEmbedding).toHaveLength(1536);
+    expect(
+      await plugin.models?.[ModelType.TEXT_EMBEDDING]?.(
+        {} as IAgentRuntime,
+        "hello world",
+      ),
+    ).toEqual(modelEmbedding);
     expect(service.embed("hello world", 8)).toEqual(embedded);
     expect(service.similarity("hello world", "hello world", 8)).toBe(1);
     expect(service.similarity("hello world", "different text", 8)).toBeLessThan(

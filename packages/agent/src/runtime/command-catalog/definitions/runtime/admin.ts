@@ -12,6 +12,14 @@ export const RuntimeAdminCommandCatalogEntries = [
   runtimeCommand("/status", "Show the top-level agent runtime status summary."),
   runtimeCommand("/doctor", "Run the operator diagnostics checklist."),
   runtimeCommand(
+    "/retry",
+    "Replay the latest conversational turn through the model after removing its prior answer.",
+  ),
+  runtimeCommand(
+    "/undo",
+    "Remove the latest conversational exchange from session memory.",
+  ),
+  runtimeCommand(
     "/setup summary",
     "Show setup, provider, and native service readiness.",
   ),

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 const coreVersion = "1.2.3";
 const compatibilityRows = [
   {
-    package: "@elizaos/plugin-autocoder",
+    package: "@doolittle/plugin-autocoder",
     coreVersion: "1.2.3",
     compatible: false,
     reason: "api mismatch",

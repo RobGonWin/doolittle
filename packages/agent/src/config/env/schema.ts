@@ -29,6 +29,10 @@ export const envSchema = z.object({
     .int()
     .positive()
     .optional(),
+  OLLAMA_API_ENDPOINT: z.string().default("http://localhost:11434/api"),
+  OLLAMA_SMALL_MODEL: z.string().default("granite4.1:3b"),
+  OLLAMA_LARGE_MODEL: z.string().default("granite4.1:3b"),
+  OLLAMA_EMBEDDING_MODEL: z.string().default("nomic-embed-text:latest"),
   OPENAI_API_KEY: z.string().optional(),
   DOOLITTLE_OFFLINE_BOOTSTRAP: z
     .enum(["true", "false"])
@@ -38,6 +42,13 @@ export const envSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((value) => value === "true"),
+  DOOLITTLE_USE_LINKED_DEVIN_AUTH: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
+  DEVIN_CLI_COMMAND: z.string().default("devin"),
+  DEVIN_MODEL: z.string().default("swe-1-6-fast"),
+  DEVIN_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
   OPENAI_BASE_URL: z.string().default("https://api.openai.com/v1"),
   OPENAI_MODEL: z.string().default("gpt-5.4"),
   OPENAI_IMAGE_MODEL: z.string().optional(),
@@ -117,7 +128,9 @@ export const envSchema = z.object({
   DOOLITTLE_DOCKER_WORKSPACE_PATH: z.string().default("/workspace"),
   DOOLITTLE_DOCKER_ENV_PASSTHROUGH: z
     .string()
-    .default("PATH,HOME,OPENAI_API_KEY,ANTHROPIC_API_KEY"),
+    .default(
+      "PATH,HOME,OLLAMA_API_ENDPOINT,OPENAI_API_KEY,ANTHROPIC_API_KEY,DEVIN_MODEL,DEVIN_CLI_COMMAND",
+    ),
   DOOLITTLE_SINGULARITY_IMAGE: z.string().default(""),
   DOOLITTLE_DAYTONA_TARGET: z.string().optional(),
   DOOLITTLE_DAYTONA_COMMAND: z.string().optional(),

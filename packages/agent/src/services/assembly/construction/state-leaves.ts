@@ -28,7 +28,7 @@ export function createServiceConstructionLeaves(params: {
   bootstrap: ServiceBootstrapState & {
     resolveModelContext: RuntimeModelContextResolver;
   };
-  core: Pick<ServiceConstructionCore, "sessions">;
+  core: Pick<ServiceConstructionCore, "sessions" | "runController">;
 }) {
   const { config, directories, bootstrap, core } = params;
   const { settings, resolveModelContext, defaultModelConfig } = bootstrap;
@@ -51,6 +51,7 @@ export function createServiceConstructionLeaves(params: {
           directories.trajectoriesDir,
           core.sessions,
           resolveModelContext,
+          core.runController,
         ),
     ),
     contextCompression: createLazySlot(

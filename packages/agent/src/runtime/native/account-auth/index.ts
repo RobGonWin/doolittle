@@ -16,6 +16,7 @@ import {
   getLinkedProviderLoginCommand,
   getLinkedProviderSetupCommand,
 } from "./connect-advice";
+import { getDevinAccountStatus, getLinkedDevinCredentials } from "./devin";
 import {
   getElizaCloudAccountStatus as getElizaCloudAccountStatusImpl,
   getLinkedElizaCloudCredentials as getLinkedElizaCloudCredentialsImpl,
@@ -30,6 +31,7 @@ import {
 import type {
   LinkedClaudeCodeCredentials,
   LinkedCodexCredentials,
+  LinkedDevinCredentials,
   LinkedElizaCloudCredentials,
   LinkedProviderAccountsSnapshot,
   LinkedProviderConnectAdvice,
@@ -40,6 +42,7 @@ export type {
   CliAuthStatus,
   LinkedClaudeCodeCredentials,
   LinkedCodexCredentials,
+  LinkedDevinCredentials,
   LinkedElizaCloudCredentials,
   LinkedProviderAccountStatus,
   LinkedProviderAccountsSnapshot,
@@ -51,6 +54,7 @@ export type {
 export {
   claudeCodeAccessTokenIsExpiring,
   getLinkedClaudeCodeCredentials,
+  getLinkedDevinCredentials,
   getLinkedProviderLoginCommand,
   getLinkedProviderSetupCommand,
   refreshLinkedClaudeCodeCredentials,
@@ -101,6 +105,7 @@ export async function resolveLinkedProviderCredentials(
 ): Promise<
   | LinkedCodexCredentials
   | LinkedClaudeCodeCredentials
+  | LinkedDevinCredentials
   | LinkedElizaCloudCredentials
   | undefined
 > {
@@ -117,6 +122,10 @@ export async function resolveLinkedProviderCredentials(
 
   if (provider === "elizacloud") {
     return getLinkedElizaCloudCredentials(homePath);
+  }
+
+  if (provider === "devin") {
+    return getLinkedDevinCredentials(homePath);
   }
 
   const credentials = getLinkedClaudeCodeCredentials(homePath);
@@ -136,6 +145,7 @@ export function getLinkedProviderAccountsSnapshot(
   return {
     codex: getCodexAccountStatus(homePath),
     claudeCode: getClaudeCodeAccountStatus(homePath),
+    devin: getDevinAccountStatus(homePath),
     elizaCloud: getElizaCloudAccountStatusImpl(
       homePath,
       getElizaCloudAuthDependencies(),
@@ -153,7 +163,9 @@ export function getLinkedProviderConnectAdvice(
       ? snapshot.codex
       : provider === "claude-code"
         ? snapshot.claudeCode
-        : snapshot.elizaCloud;
+        : provider === "devin"
+          ? snapshot.devin
+          : snapshot.elizaCloud;
   return buildLinkedProviderConnectAdvice(provider, status);
 }
 

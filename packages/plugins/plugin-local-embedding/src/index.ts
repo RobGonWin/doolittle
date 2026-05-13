@@ -1,6 +1,7 @@
 import {
   Service as ElizaService,
   type IAgentRuntime,
+  ModelType,
   type Plugin,
 } from "@elizaos/core";
 
@@ -48,6 +49,17 @@ export function createLocalEmbeddingPlugin(): Plugin {
     description:
       "Official-style local embedding plugin for offline Doolittle vector operations.",
     services: [LocalEmbeddingService],
+    models: {
+      [ModelType.TEXT_EMBEDDING]: async (_runtime, params) => {
+        const text =
+          typeof params === "string"
+            ? params
+            : typeof params?.text === "string"
+              ? params.text
+              : "";
+        return stableHashVector(text || "test", 1536);
+      },
+    },
   };
 }
 

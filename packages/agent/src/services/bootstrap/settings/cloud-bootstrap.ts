@@ -6,8 +6,10 @@ export interface PersistedProviderAvailability {
   persistedHasOpenAi: boolean;
   persistedHasAnthropic: boolean;
   persistedHasElizaCloud: boolean;
+  persistedHasOllama: boolean;
   persistedHasCodex: boolean;
   persistedHasClaudeCode: boolean;
+  persistedHasDevin: boolean;
 }
 
 export function resolvePersistedProviderAvailability(
@@ -26,16 +28,27 @@ export function resolvePersistedProviderAvailability(
       persistedProvider === "elizacloud" &&
       config.elizaCloudEnabled &&
       Boolean(config.elizaCloudApiKey?.trim()),
+    persistedHasOllama:
+      persistedProvider === "ollama" &&
+      Boolean(config.ollamaApiEndpoint?.trim()),
     persistedHasCodex:
       persistedProvider === "codex" &&
+      config.useLinkedCodexAuth &&
       Boolean(
         linkedAccounts.codex.nativeReady || linkedAccounts.codex.reusable,
       ),
     persistedHasClaudeCode:
       persistedProvider === "claude-code" &&
+      config.useLinkedClaudeCodeAuth &&
       Boolean(
         linkedAccounts.claudeCode.nativeReady ||
           linkedAccounts.claudeCode.reusable,
+      ),
+    persistedHasDevin:
+      persistedProvider === "devin" &&
+      config.useLinkedDevinAuth &&
+      Boolean(
+        linkedAccounts.devin.nativeReady || linkedAccounts.devin.reusable,
       ),
   };
 }
@@ -121,6 +134,18 @@ function setProviderFallback(
   linkedAccounts: LinkedProviderAccountsSnapshot,
   set: SettingsSetter,
 ): void {
+  if (config.ollamaApiEndpoint?.trim()) {
+    set("model.provider", "ollama");
+    set("model.model", config.ollamaLargeModel);
+    set("model.baseUrl", config.ollamaApiEndpoint);
+    return;
+  }
+  if (linkedAccounts.devin.nativeReady || linkedAccounts.devin.reusable) {
+    set("model.provider", "devin");
+    set("model.model", config.devinModel);
+    set("model.baseUrl", "");
+    return;
+  }
   if (linkedAccounts.codex.nativeReady || linkedAccounts.codex.reusable) {
     set("model.provider", "codex");
     set("model.model", "gpt-5.4");
@@ -169,13 +194,27 @@ export function applyProviderBootstrapFallbacks(
     !availability.persistedHasOpenAi &&
     !availability.persistedHasAnthropic &&
     !availability.persistedHasElizaCloud &&
+    !availability.persistedHasOllama &&
     !availability.persistedHasCodex &&
-    !availability.persistedHasClaudeCode
+    !availability.persistedHasClaudeCode &&
+    !availability.persistedHasDevin
   ) {
+    if (config.ollamaApiEndpoint?.trim()) {
+      set("model.provider", "ollama");
+      set("model.model", config.ollamaLargeModel);
+      set("model.baseUrl", config.ollamaApiEndpoint);
+      return;
+    }
     if (config.elizaCloudEnabled && config.elizaCloudApiKey?.trim()) {
       set("model.provider", "elizacloud");
       set("model.model", config.elizaCloudLargeModel);
       set("model.baseUrl", config.elizaCloudBaseUrl);
+      return;
+    }
+    if (linkedAccounts.devin.nativeReady || linkedAccounts.devin.reusable) {
+      set("model.provider", "devin");
+      set("model.model", config.devinModel);
+      set("model.baseUrl", "");
       return;
     }
     if (linkedAccounts.codex.nativeReady || linkedAccounts.codex.reusable) {

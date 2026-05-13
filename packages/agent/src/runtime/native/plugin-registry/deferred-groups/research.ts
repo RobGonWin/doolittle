@@ -1,19 +1,18 @@
 import type { Plugin } from "@elizaos/core";
+import {
+  actionBenchPlugin,
+  createAutocoderPlugin,
+} from "@plugins/doolittle-plugin";
 import { normalizePlugin } from "../support";
 import {
   type DeferredPluginGroupContext,
   resolveDeferredPluginDataRoot,
 } from "./shared";
 
-export async function loadDeferredResearchPlugins({
+export function loadDeferredResearchPlugins({
   services,
   config,
-}: DeferredPluginGroupContext): Promise<Plugin[]> {
-  const [{ actionBenchPlugin }, { createAutocoderPlugin }] = await Promise.all([
-    import("@elizaos/plugin-action-bench"),
-    import("@elizaos/plugin-autocoder"),
-  ]);
-
+}: DeferredPluginGroupContext): Plugin[] {
   return [
     normalizePlugin(actionBenchPlugin),
     createAutocoderPlugin({

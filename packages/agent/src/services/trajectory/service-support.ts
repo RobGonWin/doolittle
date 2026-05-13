@@ -1,4 +1,6 @@
 import type {
+  TrajectoryEventRecord,
+  TrajectoryFilters,
   TrajectoryModelContext,
   TrajectoryRecord,
 } from "../../types/trajectory";
@@ -15,6 +17,9 @@ export interface TrajectoryServiceSupportSource
   baseDir: string;
   sessions: Pick<SessionService, "recent" | "summary">;
   getModelContext?: () => TrajectoryModelContext;
+  eventJournal?: {
+    recent(limit: number, filters?: TrajectoryFilters): TrajectoryEventRecord[];
+  };
   slug(value: string): string;
   readRecords(dataPath: string): TrajectoryRecord[];
 }
@@ -44,6 +49,7 @@ export function createTrajectoryServiceHosts(
     bundleStorage: {
       baseDir: source.baseDir,
       sessions: source.sessions,
+      eventJournal: source.eventJournal,
       slug: sharedSlug,
     },
     rlExport: {

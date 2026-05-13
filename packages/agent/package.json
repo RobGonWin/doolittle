@@ -8,7 +8,7 @@
     "@doolittle/acp": "workspace:*",
     "@doolittle/contracts": "workspace:*",
     "@doolittle/logger": "workspace:*",
-    "@elizaos/agent": "2.0.0-alpha.85"
+    "@elizaos/agent": "2.0.0-alpha.537"
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",

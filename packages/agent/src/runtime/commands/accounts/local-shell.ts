@@ -3,11 +3,12 @@ import {
   getLinkedProviderConnectAdvice,
   getLinkedProviderLoginCommand,
   getLinkedProviderSetupCommand,
+  type LinkedProviderName,
 } from "@/runtime/native/account-auth";
 import type { AccountsCommandHooks } from "./types";
 
 export async function handleAccountLogin(
-  provider: "elizacloud" | "codex" | "claude-code",
+  provider: LinkedProviderName,
   hooks: AccountsCommandHooks,
 ): Promise<string> {
   if (hooks?.runLocalShellCommand) {

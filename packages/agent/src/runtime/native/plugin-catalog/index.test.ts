@@ -80,6 +80,7 @@ describe("getNativePluginCatalog", () => {
     const catalog = getNativePluginCatalog({
       elizaCloudApiKey: "cloud-key",
       elizaCloudEnabled: false,
+      ollamaApiEndpoint: "http://localhost:11434/api",
       useLinkedCodexAuth: true,
       useLinkedClaudeCodeAuth: false,
       openAiApiKey: "openai-key",
@@ -101,6 +102,9 @@ describe("getNativePluginCatalog", () => {
       catalog.find((entry) => entry.id === "providers.codex")?.enabled,
     ).toBe(true);
     expect(
+      catalog.find((entry) => entry.id === "providers.ollama")?.enabled,
+    ).toBe(true);
+    expect(
       catalog.find((entry) => entry.id === "providers.claude-code")?.enabled,
     ).toBe(false);
     expect(
@@ -112,12 +116,6 @@ describe("getNativePluginCatalog", () => {
     expect(
       catalog.find((entry) => entry.id === "messaging.telegram")?.enabled,
     ).toBe(true);
-    expect(
-      catalog.find((entry) => entry.id === "messaging.discord")?.enabled,
-    ).toBe(false);
-    expect(
-      catalog.find((entry) => entry.id === "browser.browser")?.persistence,
-    ).toBe("injected");
     expect(
       catalog.find((entry) => entry.id === "product.doolittle-runtime"),
     ).toMatchObject({

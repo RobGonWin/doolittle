@@ -1,43 +1,21 @@
 import { join } from "node:path";
 import type { Plugin } from "@elizaos/core";
+import {
+  createAgentOrchestratorPlugin,
+  createCodingAgentPlugin,
+} from "@plugins/doolittle-plugin";
 import type { AppServices } from "../../../services";
 import { inspectLocalProject } from "../../../services/project-inspection";
 import type { EnvConfig } from "../../../types/runtime";
 import { normalizeDelegationInput } from "../plugin-assembly-delegation";
-import { buildNativePluginManagerSummary } from "../plugin-assembly-support";
-import type {
-  NativePluginCatalog,
-  NativePluginCatalogGroups,
-} from "../plugin-catalog";
 
 export async function loadHotExecutionPlugins(
   services: AppServices,
   config: EnvConfig,
-  catalog: NativePluginCatalog,
-  groupedCatalog: NativePluginCatalogGroups,
 ): Promise<Plugin[]> {
-  const [
-    { createShellPlugin },
-    { createCodingAgentPlugin },
-    { createAgentOrchestratorPlugin },
-    { createPluginManagerPlugin },
-    { createPlanningPlugin },
-  ] = await Promise.all([
-    import("@elizaos/plugin-shell"),
-    import("@elizaos/plugin-coding-agent"),
-    import("@elizaos/plugin-agent-orchestrator"),
-    import("@elizaos/plugin-plugin-manager"),
-    import("@elizaos/plugin-planning"),
-  ]);
+  const { createPlanningPlugin } = await import("@elizaos/plugin-planning");
 
   return [
-    createShellPlugin({
-      terminal: {
-        run: (command) => services.terminal.run(command),
-        getHistory: (limit = 20) => services.terminal.getHistory(limit),
-        status: () => services.terminal.status(),
-      },
-    }),
     createCodingAgentPlugin({
       workspaceRoot: services.workspace.root(),
       workspace: services.workspace,
@@ -79,13 +57,6 @@ export async function loadHotExecutionPlugins(
           services.delegation.supervise(runner as never, options as never),
         runQueued: (runner, options) =>
           services.delegation.runQueued(runner as never, options as never),
-      },
-    }),
-    createPluginManagerPlugin({
-      plugins: {
-        list: () => catalog,
-        categories: () => groupedCatalog,
-        summary: () => buildNativePluginManagerSummary(catalog),
       },
     }),
     createPlanningPlugin({

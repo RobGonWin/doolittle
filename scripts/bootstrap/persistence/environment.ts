@@ -18,14 +18,17 @@ export function buildBootstrapEnvUpdates(
     ELIZAOS_CLOUD_SMALL_MODEL: answers.elizaCloudSmallModel,
     ELIZAOS_CLOUD_LARGE_MODEL: answers.elizaCloudModel,
     ELIZAOS_CLOUD_EMBEDDING_MODEL: answers.elizaCloudEmbeddingModel,
+    OLLAMA_API_ENDPOINT: answers.ollamaApiEndpoint,
+    OLLAMA_SMALL_MODEL: answers.ollamaSmallModel,
+    OLLAMA_LARGE_MODEL: answers.ollamaLargeModel,
+    OLLAMA_EMBEDDING_MODEL: answers.ollamaEmbeddingModel,
+    DOOLITTLE_EMBEDDING_PROVIDER: "local",
     OPENAI_API_KEY:
       answers.provider === "openai" || answers.provider === "hybrid"
         ? answers.openaiApiKey
         : "",
     DOOLITTLE_USE_LINKED_CODEX_AUTH: String(
-      answers.useLinkedCodexAuth ||
-        answers.provider === "codex" ||
-        answers.provider === "hybrid",
+      answers.provider === "codex" || answers.provider === "hybrid",
     ),
     OPENAI_MODEL:
       answers.provider === "openai" ||
@@ -33,6 +36,10 @@ export function buildBootstrapEnvUpdates(
       answers.provider === "codex"
         ? answers.openaiModel
         : "gpt-5.4",
+    DOOLITTLE_USE_LINKED_DEVIN_AUTH: String(answers.provider === "devin"),
+    DEVIN_CLI_COMMAND: answers.devinCliCommand || "devin",
+    DEVIN_MODEL: answers.devinModel || "swe-1-6-fast",
+    DEVIN_TIMEOUT_MS: String(answers.devinTimeoutMs || 120_000),
     ANTHROPIC_API_KEY:
       answers.provider === "anthropic" || answers.provider === "hybrid"
         ? answers.anthropicApiKey
@@ -42,9 +49,7 @@ export function buildBootstrapEnvUpdates(
         ? answers.claudeCodeOauthToken
         : "",
     DOOLITTLE_USE_LINKED_CLAUDE_CODE_AUTH: String(
-      answers.useLinkedClaudeCodeAuth ||
-        answers.provider === "claude-code" ||
-        answers.provider === "hybrid",
+      answers.provider === "claude-code" || answers.provider === "hybrid",
     ),
     DOOLITTLE_CLAUDE_CODE_CLI_FALLBACK: String(
       answers.provider === "claude-code" && answers.claudeCodeCliFallback,

@@ -27,15 +27,12 @@ describe("AgentSdkService", () => {
     sdk.audit = async () => ({
       foundationPackages: ["@elizaos/agent", "@elizaos/autonomous"],
       installed: {
-        "@elizaos/agent": "2.0.0-alpha.85",
+        "@elizaos/agent": "2.0.0-alpha.537",
         "@elizaos/autonomous": "2.0.0-alpha.85",
       },
       ecosystemPackages: [],
       ecosystemInstalled: {},
-      compatibility: [
-        { plugin: "@elizaos/plugin-openai", compatible: true },
-        { plugin: "@elizaos/plugin-browser", compatible: true },
-      ],
+      compatibility: [{ plugin: "@elizaos/plugin-openai", compatible: true }],
       skillCatalog: {
         cachedSkills: 8,
       },
@@ -59,7 +56,7 @@ describe("AgentSdkService", () => {
       installedFoundationPackages: 2,
       ecosystemPackages: 0,
       installedEcosystemPackages: 0,
-      compatibilityChecks: 2,
+      compatibilityChecks: 1,
       compatibilityFailures: 0,
       registryEndpoints: 2,
       registryPlugins: 14,

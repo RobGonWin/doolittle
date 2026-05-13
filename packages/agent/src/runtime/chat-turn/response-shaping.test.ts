@@ -1,29 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import {
   buildNativePlanningFailureMessage,
-  buildSimpleGreetingReply,
   buildSystemFactsContext,
   isRecoverableNativePlanningError,
   shouldAttachSystemFacts,
 } from "./response-shaping";
 
 describe("chat turn response shaping", () => {
-  it("builds stable greeting replies for common operator phrasing", () => {
-    expect(buildSimpleGreetingReply("how are you today")).toBe(
-      "Doing well. What do you want to work on?",
-    );
-    expect(buildSimpleGreetingReply("thanks")).toBe("Sure. What's next?");
-    expect(buildSimpleGreetingReply("yo doolittle")).toBe(
-      "Yo. What do you want to work on?",
-    );
-    expect(buildSimpleGreetingReply("howdy partner")).toBe(
-      "Howdy. What can I help you with?",
-    );
-    expect(buildSimpleGreetingReply("hello there")).toBe(
-      "Hey! What can I help you with?",
-    );
-  });
-
   it("recognizes recoverable native planning prompt-shaping failures", () => {
     expect(
       isRecoverableNativePlanningError(new Error("Failed to parse JSON state")),

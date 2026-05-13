@@ -16,6 +16,7 @@ export type {
 
 export class SessionService {
   declare storeMessage: SessionServiceApi["storeMessage"];
+  declare deleteLatestExchange: SessionServiceApi["deleteLatestExchange"];
   declare onActivity: SessionServiceApi["onActivity"];
   declare search: SessionServiceApi["search"];
   declare recent: SessionServiceApi["recent"];

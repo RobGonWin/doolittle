@@ -159,12 +159,17 @@ export async function runElizaCloudProviderBranch(args: {
       } else {
         state.provider = "offline";
       }
+    } else if (recovery === "devin") {
+      state.provider = "devin";
+      state.useLinkedDevinAuth = true;
     } else if (recovery === "codex") {
       state.provider = "codex";
       state.useLinkedCodexAuth = true;
     } else if (recovery === "claude-code") {
       state.provider = "claude-code";
       state.useLinkedClaudeCodeAuth = true;
+    } else if (recovery === "ollama") {
+      state.provider = "ollama";
     } else if (recovery === "openai") {
       state.provider = "openai";
     } else if (recovery === "anthropic") {

@@ -33,6 +33,17 @@ export const PROVIDER_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
       "Workspace-native Eliza Cloud provider plugin for managed ElizaOS inference and cloud-native defaults.",
   },
   {
+    id: "providers.ollama",
+    packageName: "@elizaos/plugin-ollama",
+    category: "providers",
+    source: "official",
+    kind: "provider",
+    maturity: "alpha",
+    enablement: "ollama",
+    notes:
+      "Official local/self-hosted Ollama provider for offline text, object, and embedding model routing.",
+  },
+  {
     id: "providers.codex",
     packageName: "@elizaos/plugin-codex",
     category: "providers",
@@ -53,6 +64,17 @@ export const PROVIDER_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
     enablement: "claudeCode",
     notes:
       "Workspace-native Claude Code provider plugin for Claude-native workflows.",
+  },
+  {
+    id: "providers.devin",
+    packageName: "@elizaos/plugin-devin",
+    category: "providers",
+    source: "custom",
+    kind: "provider",
+    maturity: "alpha",
+    enablement: "devin",
+    notes:
+      "Workspace-native Devin CLI provider plugin for SWE model workflows.",
   },
   {
     id: "providers.openai",

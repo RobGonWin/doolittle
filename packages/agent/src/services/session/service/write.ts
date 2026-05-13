@@ -15,6 +15,13 @@ export class SessionWriteOperations {
     this.messageStore.storeMessage(message);
   }
 
+  deleteLatestExchange(
+    sessionId: string,
+    options?: { skipSlashCommands?: boolean },
+  ) {
+    return this.messageStore.deleteLatestExchange(sessionId, options);
+  }
+
   onActivity(
     listener: (event: SessionMessageActivityEvent) => void,
   ): () => void {

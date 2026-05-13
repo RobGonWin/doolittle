@@ -67,6 +67,15 @@ function createLinkedAccounts(): LinkedProviderAccountsSnapshot {
       setupCommand: "claude setup-token",
       loginCommand: "claude auth login",
     },
+    devin: {
+      provider: "devin",
+      available: false,
+      nativeReady: false,
+      reusable: false,
+      fallbackReady: false,
+      detail: "Devin not linked",
+      loginCommand: "devin auth login",
+    },
     elizaCloud: {
       provider: "elizacloud",
       available: false,

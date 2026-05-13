@@ -51,6 +51,9 @@ export function readEnvBase(existingEnv: Map<string, string>) {
     },
     openaiApiKey: existingEnv.get("OPENAI_API_KEY") || "",
     openaiModel: existingEnv.get("OPENAI_MODEL") || "gpt-5.4",
+    devinCliCommand: existingEnv.get("DEVIN_CLI_COMMAND") || "devin",
+    devinModel: existingEnv.get("DEVIN_MODEL") || "swe-1-6-fast",
+    devinTimeoutMs: Number(existingEnv.get("DEVIN_TIMEOUT_MS") || 120_000),
     elizaCloudApiKey,
     elizaCloudSmallModel: normalizeElizaCloudSmallModel(
       existingEnv.get("ELIZAOS_CLOUD_SMALL_MODEL"),
@@ -61,6 +64,12 @@ export function readEnvBase(existingEnv: Map<string, string>) {
     elizaCloudEmbeddingModel: normalizeElizaCloudEmbeddingModel(
       existingEnv.get("ELIZAOS_CLOUD_EMBEDDING_MODEL"),
     ),
+    ollamaApiEndpoint:
+      existingEnv.get("OLLAMA_API_ENDPOINT") || "http://localhost:11434/api",
+    ollamaSmallModel: existingEnv.get("OLLAMA_SMALL_MODEL") || "granite4.1:3b",
+    ollamaLargeModel: existingEnv.get("OLLAMA_LARGE_MODEL") || "granite4.1:3b",
+    ollamaEmbeddingModel:
+      existingEnv.get("OLLAMA_EMBEDDING_MODEL") || "nomic-embed-text:latest",
     anthropicApiKey: existingEnv.get("ANTHROPIC_API_KEY") || "",
     claudeCodeCliFallback:
       existingEnv.get("DOOLITTLE_CLAUDE_CODE_CLI_FALLBACK") === "true",

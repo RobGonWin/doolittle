@@ -21,9 +21,9 @@ export function createDefaultSettings(
 ): RuntimeSettings {
   return {
     model: {
-      provider: "openai",
-      model: "gpt-5.4",
-      baseUrl: "https://api.openai.com/v1",
+      provider: "devin",
+      model: "swe-1-6-fast",
+      baseUrl: "",
       temperature: 0.4,
       maxTokens: 1200,
     },
@@ -58,8 +58,11 @@ export function createDefaultSettings(
       dockerEnvPassthrough: [
         "PATH",
         "HOME",
+        "OLLAMA_API_ENDPOINT",
         "OPENAI_API_KEY",
         "ANTHROPIC_API_KEY",
+        "DEVIN_MODEL",
+        "DEVIN_CLI_COMMAND",
       ],
       singularityImage: "",
       daytonaTarget: "",

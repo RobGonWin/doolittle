@@ -33,9 +33,17 @@ function buildConfig(root: string): EnvConfig {
     elizaCloudSmallModel: "anthropic/claude-haiku-4-5-20251001",
     elizaCloudLargeModel: "anthropic/claude-sonnet-4.6",
     elizaCloudEmbeddingModel: "openai/text-embedding-3-small",
+    ollamaApiEndpoint: "http://localhost:11434/api",
+    ollamaSmallModel: "granite4.1:3b",
+    ollamaLargeModel: "granite4.1:3b",
+    ollamaEmbeddingModel: "nomic-embed-text:latest",
     openAiApiKey: undefined,
     offlineBootstrapMode: false,
     useLinkedCodexAuth: false,
+    useLinkedDevinAuth: false,
+    devinCliCommand: "devin",
+    devinModel: "swe-1-6-fast",
+    devinTimeoutMs: 120000,
     openAiBaseUrl: "https://api.openai.com/v1",
     openAiModel: "gpt-4.1-mini",
     openAiTemperature: 0.4,
@@ -271,8 +279,9 @@ describe("DiagnosticsService", () => {
         checks.some(
           (check) =>
             check.id === "autonomous.connection" &&
-            check.status === "warn" &&
-            check.detail.includes("missing"),
+            check.status === "pass" &&
+            check.detail.includes("local-provider") &&
+            check.detail.includes("Ollama"),
         ),
       ).toBe(true);
       expect(

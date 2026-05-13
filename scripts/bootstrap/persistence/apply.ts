@@ -43,6 +43,10 @@ export async function applyBootstrapAnswers(
     elizaCloudSmallModel: answers.elizaCloudSmallModel,
     elizaCloudLargeModel: answers.elizaCloudModel,
     elizaCloudEmbeddingModel: answers.elizaCloudEmbeddingModel,
+    ollamaApiEndpoint: answers.ollamaApiEndpoint,
+    ollamaSmallModel: answers.ollamaSmallModel,
+    ollamaLargeModel: answers.ollamaLargeModel,
+    ollamaEmbeddingModel: answers.ollamaEmbeddingModel,
     openAiApiKey:
       answers.provider === "openai" || answers.provider === "hybrid"
         ? answers.openaiApiKey || undefined
@@ -57,6 +61,11 @@ export async function applyBootstrapAnswers(
       answers.provider === "codex"
         ? answers.openaiModel
         : "gpt-5.4",
+    useLinkedDevinAuth:
+      answers.useLinkedDevinAuth || answers.provider === "devin",
+    devinCliCommand: answers.devinCliCommand ?? "devin",
+    devinModel: answers.devinModel ?? "swe-1-6-fast",
+    devinTimeoutMs: answers.devinTimeoutMs ?? 120_000,
     anthropicApiKey:
       answers.provider === "anthropic" || answers.provider === "hybrid"
         ? answers.anthropicApiKey || undefined

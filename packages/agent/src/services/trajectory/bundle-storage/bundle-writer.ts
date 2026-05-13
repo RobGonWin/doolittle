@@ -35,6 +35,16 @@ export function writeTrajectoryBundleRecords(
     },
     {},
   );
+  const recordKindCounts = messages.reduce<Record<string, number>>(
+    (counts, message) => {
+      const kind = message.kind ?? "message";
+      counts[kind] = (counts[kind] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
+  const eventCount = recordKindCounts.event ?? 0;
+  const messageRecordCount = messages.length - eventCount;
   const sessions = unique(messages.map((message) => message.sessionId));
 
   writeFileSync(
@@ -61,10 +71,14 @@ export function writeTrajectoryBundleRecords(
         },
         dataPath,
         summaryPath,
+        recordCount: messages.length,
         messageCount: messages.length,
+        messageRecordCount,
+        eventCount,
         sessionCount: sessions.length,
         sessions,
         roleCounts,
+        recordKindCounts,
       },
       null,
       2,
@@ -82,13 +96,21 @@ export function writeTrajectoryBundleRecords(
       `- Purpose: ${options.purpose}`,
       ...(options.tags?.length ? [`- Tags: ${options.tags.join(", ")}`] : []),
       ...(options.notes ? [`- Notes: ${options.notes}`] : []),
+      `- Records: ${messages.length}`,
       `- Messages: ${messages.length}`,
+      `- Message records: ${messageRecordCount}`,
+      `- Event records: ${eventCount}`,
       `- Sessions: ${sessions.length}`,
       `- Filters: session=${options.sessionId ?? "any"}, role=${options.role ?? "any"}, limit=${options.limit}`,
       "",
       "## Role Counts",
       ...Object.entries(roleCounts).map(
         ([role, count]) => `- ${role}: ${count}`,
+      ),
+      "",
+      "## Record Kinds",
+      ...Object.entries(recordKindCounts).map(
+        ([kind, count]) => `- ${kind}: ${count}`,
       ),
       "",
       "## Sessions",

@@ -2,23 +2,12 @@ import { describe, expect, it } from "bun:test";
 
 import {
   buildNativePlanningFailureMessage,
-  buildSimpleGreetingReply,
   buildSystemFactsContext,
   isRecoverableNativePlanningError,
   shouldAttachSystemFacts,
 } from "./chat-turn/response-shaping";
 
 describe("chat turn response shaping helpers", () => {
-  it("builds the expected simple greeting replies", () => {
-    expect(buildSimpleGreetingReply("how are you today")).toBe(
-      "Doing well. What do you want to work on?",
-    );
-    expect(buildSimpleGreetingReply("thanks")).toBe("Sure. What's next?");
-    expect(buildSimpleGreetingReply("yo")).toBe(
-      "Yo. What do you want to work on?",
-    );
-  });
-
   it("detects machine questions and produces system facts", () => {
     expect(shouldAttachSystemFacts("what os am I on?")).toBe(true);
     expect(shouldAttachSystemFacts("/status")).toBe(false);

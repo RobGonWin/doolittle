@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import type { AgentExecutionContext } from "@/runtime/chat";
 import { classifyTurnMessage } from "@/runtime/turn-classification/message";
-import { buildInformationalResponseCacheKey } from "./chat-turn/cache";
 import { createModelInputAssembly } from "./chat-turn/model-input";
 
 function createModelInputContext() {
@@ -28,6 +27,35 @@ function createModelInputContext() {
             temperature: 0.2,
             maxTokens: 2048,
           },
+        }),
+      },
+      sessions: {
+        recentBySession: () => [
+          {
+            sessionId: "session-1",
+            createdAt: "2026-05-13T00:00:00.000Z",
+            role: "user",
+            text: "We want the Doolittle-native wow loop.",
+          },
+        ],
+      },
+      userProfiles: {
+        get: () => ({
+          userId: "alice",
+          displayName: "Alex",
+          aliases: [],
+          facts: ["building Doolittle as an ElizaOS harness"],
+          preferences: ["prefers visible todos"],
+          explicitMemories: [],
+        }),
+        recall: () => [],
+      },
+      memory: {
+        summary: (target: "memory" | "user") => ({
+          target,
+          entries: target === "memory" ? 1 : 0,
+          characters: 20,
+          preview: [],
         }),
       },
     },
@@ -68,6 +96,9 @@ describe("chat turn model input seam", () => {
 
     expect(assembly.capabilityProfile).toBe("coding");
     expect(assembly.requiresPreferredLocalIntentSynthesis).toBe(false);
+    expect(built.messagePrelude).toContain("DOOLITTLE EXPERIENCE CONTRACT");
+    expect(built.messagePrelude).toContain("concise todo/checklist");
+    expect(built.messagePrelude).toContain("savedDisplayName=Alex");
     expect(built.messagePrelude).toContain("Live machine facts:");
     expect(built.messagePrelude).toContain("CAPABILITY PROFILE");
     expect(built.messagePrelude).toContain("profile=coding");
@@ -76,7 +107,7 @@ describe("chat turn model input seam", () => {
     expect(built.effectiveMessage).toEndWith(`User request:\n${message}`);
   });
 
-  it("keeps cache eligibility and supports local synthesis prelude injection", () => {
+  it("supports local synthesis prelude injection without response caching", () => {
     const context = createModelInputContext();
     const message = "what os am I on?";
 
@@ -111,15 +142,7 @@ describe("chat turn model input seam", () => {
     const built = assembly.build(localSynthesisPrelude);
 
     expect(assembly.requiresPreferredLocalIntentSynthesis).toBe(true);
-    expect(assembly.responseCacheKey).toBe(
-      buildInformationalResponseCacheKey({
-        sessionId: "session-1",
-        provider: "openai",
-        model: "gpt-4.1",
-        personalityId: "reviewer",
-        message,
-      }),
-    );
+    expect("responseCacheKey" in assembly).toBe(false);
     expect(built.messagePrelude).toContain(localSynthesisPrelude);
     expect(built.effectiveMessage).toContain(localSynthesisPrelude);
     expect(built.effectiveMessage).toEndWith(`User request:\n${message}`);

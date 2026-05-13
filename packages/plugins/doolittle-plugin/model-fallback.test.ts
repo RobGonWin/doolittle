@@ -26,6 +26,11 @@ describe("hasConfiguredModelProvider", () => {
     ).toBe(true);
     expect(
       hasConfiguredModelProvider(
+        createConfig({ ollamaApiEndpoint: "http://localhost:11434/api" }),
+      ),
+    ).toBe(true);
+    expect(
+      hasConfiguredModelProvider(
         createConfig({ useLinkedCodexAuth: true, openAiApiKey: "" }),
       ),
     ).toBe(true);

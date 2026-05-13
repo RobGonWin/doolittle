@@ -121,6 +121,8 @@ export async function runProviderModelTurn(
       const messageExecutionResult = await executeProviderMessageTurn({
         context: input.context,
         memory,
+        sessionId: input.turn.sessionId,
+        runId: input.turn.runId,
         streamState,
         derivedTurnPolicy: input.derivedTurnPolicy,
         abortSignal: input.options?.abortSignal,

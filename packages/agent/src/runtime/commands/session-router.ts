@@ -7,6 +7,19 @@ export async function handleSessionCommand(
   sessionKey: string,
   context: AgentExecutionContext,
 ): Promise<string | undefined> {
+  if (trimmed === "/undo") {
+    const result = context.services.sessions.deleteLatestExchange(sessionKey, {
+      skipSlashCommands: true,
+    });
+    if (!result.userMessage) {
+      return "No conversational exchange is available to undo.";
+    }
+    return [
+      `Undid the latest exchange (${result.deletedMessages} message${result.deletedMessages === 1 ? "" : "s"} removed).`,
+      `Prompt: ${result.userMessage.text.slice(0, 180)}`,
+    ].join("\n");
+  }
+
   if (trimmed.startsWith("/search ")) {
     const query = trimmed.replace("/search ", "").trim();
     const matches = context.services.sessions.search(

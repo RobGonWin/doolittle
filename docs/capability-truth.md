@@ -3,7 +3,7 @@
 This file is generated from the code-backed capability truth records used during the stabilization pass.
 Do not edit it by hand; run `bun run scripts/sync-doc-truth.ts --write`.
 
-## @elizaos/plugin-browser
+## doolittle:services.web
 
 - Runtime ID: `browser.browser`
 - Headline: Browser capture is truthful about pixel versus placeholder output.
@@ -27,7 +27,7 @@ Do not edit it by hand; run `bun run scripts/sync-doc-truth.ts --write`.
 - Pixel capture is a lightweight raster card generated from the fetched page snapshot, not a full DOM screenshot engine.
 - Interactive upstream browser claims such as CAPTCHA solving and session management are not part of the documented Doolittle runtime contract.
 
-## @elizaos/plugin-tts
+## doolittle:services.media
 
 - Runtime ID: `media.tts`
 - Headline: TTS is a runtime adapter with explicit active versus degraded readiness.
@@ -50,7 +50,7 @@ Do not edit it by hand; run `bun run scripts/sync-doc-truth.ts --write`.
 
 - The runtime contract is readiness-first: callers should inspect status before treating speech generation as available.
 
-## @elizaos/plugin-autocoder
+## @doolittle/plugin-autocoder
 
 - Runtime ID: `research.autocoder`
 - Headline: Autocoder remains experimental and planning-first until real mutation flows are fully implemented.

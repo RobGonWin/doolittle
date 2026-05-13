@@ -12,6 +12,7 @@ import {
   startTrackedTurn,
   storeSessionMessage,
 } from "./state";
+import { recordTrajectoryEvent } from "./trajectory";
 
 type TurnPerfTrace = {
   mark(phase: string): void;
@@ -104,6 +105,19 @@ export async function runShellPostCommandTurn(
   }
 
   const shellAction = `shell:${command}`;
+  recordTrajectoryEvent(input.context, {
+    category: "tool",
+    event: "tool.request",
+    sessionId: turn.sessionId,
+    runId: turn.runId,
+    roomId: String(turn.roomId),
+    source: input.input.source ?? "cli",
+    text: `[tool:request] ${shellAction}`,
+    metadata: {
+      tool: "shell",
+      command,
+    },
+  });
   input.context.services.runController.noteActionStarted(
     turn.sessionId,
     shellAction,
@@ -119,6 +133,20 @@ export async function runShellPostCommandTurn(
       input.options,
     );
   } catch (error) {
+    recordTrajectoryEvent(input.context, {
+      category: "tool",
+      event: "tool.error",
+      sessionId: turn.sessionId,
+      runId: turn.runId,
+      roomId: String(turn.roomId),
+      source: input.input.source ?? "cli",
+      text: `[tool:error] ${shellAction}`,
+      metadata: {
+        tool: "shell",
+        command,
+        error,
+      },
+    });
     input.context.services.runController.noteActionCompleted(
       turn.sessionId,
       shellAction,
@@ -137,6 +165,25 @@ export async function runShellPostCommandTurn(
   );
 
   const shellResponse = executionContext.formatShellCommandResponse(result);
+  recordTrajectoryEvent(input.context, {
+    category: "tool",
+    event: "tool.response",
+    sessionId: turn.sessionId,
+    runId: turn.runId,
+    roomId: String(turn.roomId),
+    source: input.input.source ?? "cli",
+    elapsedMs: result.durationMs,
+    text: `[tool:response] ${shellAction} exit=${result.exitCode}`,
+    metadata: {
+      tool: "shell",
+      command,
+      exitCode: result.exitCode,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      durationMs: result.durationMs,
+      formattedResponse: shellResponse,
+    },
+  });
   await finalizeTurnResponse(
     input.context,
     turn,

@@ -31,6 +31,10 @@ const answers: WizardAnswers = {
   elizaCloudSmallModel: "small",
   elizaCloudModel: "large",
   elizaCloudEmbeddingModel: "embedding",
+  ollamaApiEndpoint: "http://localhost:11434/api",
+  ollamaSmallModel: "granite4.1:3b",
+  ollamaLargeModel: "granite4.1:3b",
+  ollamaEmbeddingModel: "nomic-embed-text:latest",
   anthropicApiKey: "anthropic-key",
   useLinkedClaudeCodeAuth: true,
   claudeCodeCliFallback: false,
@@ -69,5 +73,11 @@ describe("bootstrap persistence env updates", () => {
     expect(envUpdates.E2B_API_KEY).toBe("e2b-key");
     expect(envUpdates.OPENAI_API_KEY).toBe("");
     expect(envUpdates.TELEGRAM_BOT_TOKEN).toBe("telegram-token");
+    expect(envUpdates.OLLAMA_API_ENDPOINT).toBe("http://localhost:11434/api");
+    expect(envUpdates.OLLAMA_SMALL_MODEL).toBe("granite4.1:3b");
+    expect(envUpdates.OLLAMA_LARGE_MODEL).toBe("granite4.1:3b");
+    expect(envUpdates.OLLAMA_EMBEDDING_MODEL).toBe("nomic-embed-text:latest");
+    expect(envUpdates.DOOLITTLE_EMBEDDING_PROVIDER).toBe("local");
+    expect(envUpdates.DOOLITTLE_USE_LINKED_CODEX_AUTH).toBe("false");
   });
 });

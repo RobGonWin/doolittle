@@ -76,9 +76,35 @@ function summarizeLaggingStartupPhases(
   startup: ReturnType<AppContext["services"]["startupState"]["getSnapshot"]>,
 ): string {
   const lagging = Object.entries(startup.phases)
-    .filter(([, phase]) => phase.status !== "ready")
+    .filter(
+      ([name, phase]) =>
+        name !== "runtime" &&
+        phase.status !== "ready" &&
+        phase.status !== "deferred",
+    )
     .map(([name, phase]) => `${name}:${phase.status}`);
   return lagging.length > 0 ? ` · ${lagging.join(" · ")}` : "";
+}
+
+function summarizeBackgroundStartup(
+  startup: ReturnType<AppContext["services"]["startupState"]["getSnapshot"]>,
+): string {
+  const backgroundPhases = Object.entries(startup.phases).filter(
+    ([name]) => name !== "runtime",
+  );
+  if (backgroundPhases.some(([, phase]) => phase.status === "error")) {
+    return "attention";
+  }
+  if (startup.deferredReady) {
+    return "ready";
+  }
+  if (backgroundPhases.some(([, phase]) => phase.status === "warming")) {
+    return "warming";
+  }
+  if (backgroundPhases.some(([, phase]) => phase.status === "deferred")) {
+    return "queued";
+  }
+  return "ready";
 }
 
 export interface CliOperatorSnapshot {
@@ -157,7 +183,7 @@ export function buildCliOperatorSnapshot(
     : "idle";
 
   const startupSummary =
-    `${startup.hotPathReady ? "hot-ready" : "warming"} · deferred ${startup.deferredReady ? "ready" : "warming"}` +
+    `${startup.hotPathReady ? "hot-ready" : "warming"} · background ${summarizeBackgroundStartup(startup)}` +
     summarizeLaggingStartupPhases(startup);
   const transportSummary = `live ${transportControl.totals.liveServices} · ready ${transportControl.totals.operationalTransports} · configured ${transportControl.totals.gatewayEnabled}`;
   const pluginSummary = [
@@ -172,7 +198,7 @@ export function buildCliOperatorSnapshot(
   const nextPlainHint = activeRun
     ? `Live turn in progress. Check ${normalizeSlashCommandSyntax("/progress")} or let the run finish before starting another deep task.`
     : !startup.deferredReady || !startup.hotPathReady
-      ? `Startup is still warming. Use ${normalizeSlashCommandSyntax("/status")} if you want a readiness check before heavier work.`
+      ? `Background services are hydrating. Use ${normalizeSlashCommandSyntax("/status")} if you want a readiness check before heavier work.`
       : transportControl.totals.gatewayEnabled > 0 &&
           transportControl.totals.operationalTransports === 0
         ? `Gateway is configured but not live yet. Use ${normalizeSlashCommandSyntax("/gateway readiness")} before relying on transports.`
@@ -180,7 +206,7 @@ export function buildCliOperatorSnapshot(
   const nextCockpitHint = activeRun
     ? `${macAwareKeyLabel("Ctrl-S")} focuses the live response. ${normalizeSlashCommandSyntax("/progress")} gives the structured run view.`
     : !startup.deferredReady || !startup.hotPathReady
-      ? `Hydration is still warming. Stay on the signal rail or run ${normalizeSlashCommandSyntax("/status")}.`
+      ? `Background services are hydrating. Stay on the signal rail or run ${normalizeSlashCommandSyntax("/status")}.`
       : transportControl.totals.gatewayEnabled > 0 &&
           transportControl.totals.operationalTransports === 0
         ? `${macAwareKeyLabel("Ctrl-G")} opens gateway detail. ${normalizeSlashCommandSyntax("/gateway readiness")} explains what is missing.`

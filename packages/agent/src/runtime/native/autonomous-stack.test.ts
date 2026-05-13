@@ -51,6 +51,10 @@ describe("autonomous stack", () => {
       elizaCloudSmallModel: "anthropic/claude-haiku-4-5-20251001",
       elizaCloudLargeModel: "anthropic/claude-sonnet-4.6",
       elizaCloudEmbeddingModel: "openai/text-embedding-3-small",
+      ollamaApiEndpoint: "http://localhost:11434/api",
+      ollamaSmallModel: "granite4.1:3b",
+      ollamaLargeModel: "granite4.1:3b",
+      ollamaEmbeddingModel: "nomic-embed-text:latest",
       useLinkedCodexAuth: false,
       useLinkedClaudeCodeAuth: false,
       claudeCodeCliFallback: false,
@@ -80,6 +84,43 @@ describe("autonomous stack", () => {
         kind: "cloud-managed",
         provider: "elizacloud",
       },
+    });
+  });
+
+  it("keeps saved cloud credentials inactive when local Devin is selected", () => {
+    const config = {
+      elizaCloudEnabled: false,
+      elizaCloudApiKey: "saved-cloud-key",
+      elizaCloudSmallModel: "openai/gpt-oss-20b",
+      elizaCloudLargeModel: "openai/gpt-oss-20b",
+      useLinkedDevinAuth: true,
+      devinModel: "swe-1-6-fast",
+      devinCliCommand: "devin",
+      devinTimeoutMs: 120_000,
+      useLinkedCodexAuth: false,
+      useLinkedClaudeCodeAuth: false,
+      claudeCodeCliFallback: false,
+      openAiApiKey: undefined,
+      anthropicApiKey: undefined,
+      openAiModel: "gpt-5.4",
+      anthropicLargeModel: "claude-sonnet-4.6",
+      telegramBotToken: undefined,
+      discordBotToken: undefined,
+    } as EnvConfig;
+
+    expect(buildAutonomousCompatEnv(config).ELIZAOS_CLOUD_API_KEY).toBe(
+      undefined,
+    );
+    expect(buildAutonomousCompatConfig(config)).not.toHaveProperty("cloud");
+    expect(summarizeAutonomousConnection(config)).toMatchObject({
+      configured: true,
+      kind: "local-provider",
+      provider: "devin",
+      primaryModel: "swe-1-6-fast",
+    });
+    expect(describeAutonomousAlignment(config).connection).toMatchObject({
+      kind: "local-provider",
+      provider: "devin",
     });
   });
 

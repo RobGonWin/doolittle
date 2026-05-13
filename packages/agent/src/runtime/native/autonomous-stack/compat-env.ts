@@ -2,7 +2,7 @@ import type { EnvConfig } from "@/types/runtime";
 
 export function buildAutonomousCompatEnv(config: EnvConfig): NodeJS.ProcessEnv {
   return {
-    ...(config.elizaCloudApiKey
+    ...(config.elizaCloudEnabled && config.elizaCloudApiKey
       ? {
           ELIZAOS_CLOUD_API_KEY: config.elizaCloudApiKey,
         }
@@ -20,6 +20,12 @@ export function buildAutonomousCompatEnv(config: EnvConfig): NodeJS.ProcessEnv {
     ...(config.anthropicApiKey
       ? {
           ANTHROPIC_API_KEY: config.anthropicApiKey,
+        }
+      : {}),
+    ...(config.useLinkedDevinAuth
+      ? {
+          DEVIN_CLI_COMMAND: config.devinCliCommand,
+          DEVIN_MODEL: config.devinModel,
         }
       : {}),
     ...(config.telegramBotToken

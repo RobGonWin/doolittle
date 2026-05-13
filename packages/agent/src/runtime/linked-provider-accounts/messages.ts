@@ -4,8 +4,62 @@ import { displayCommand } from "@/runtime/commands/command-execution";
 export const ELIZA_CLOUD_BILLING_URL =
   "https://www.elizacloud.ai/dashboard/settings?tab=billing";
 
+const LEGACY_ELIZA_CLOUD_HOST_ALIASES = new Set([
+  "elizacloud.ai",
+  "www.elizacloud.ai",
+]);
+
+function isLoopbackHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return (
+    normalized === "localhost" ||
+    normalized === "::1" ||
+    normalized === "0:0:0:0:0:0:0:1" ||
+    normalized.startsWith("127.")
+  );
+}
+
+function trimApiPath(pathname: string): string {
+  const normalized = pathname.trim().replace(/\/+$/, "");
+  if (!normalized || normalized === "/api/v1") {
+    return "";
+  }
+  if (normalized.endsWith("/api/v1")) {
+    return normalized.slice(0, -"/api/v1".length);
+  }
+  return normalized;
+}
+
+function normalizeExplicitElizaCloudSiteUrl(raw: string): string {
+  try {
+    const parsed = new URL(raw);
+    const host = parsed.hostname.toLowerCase();
+    parsed.hash = "";
+    parsed.search = "";
+    parsed.pathname = trimApiPath(parsed.pathname);
+    if (!isLoopbackHost(host)) {
+      parsed.protocol = "https:";
+      parsed.port = "";
+    }
+    if (LEGACY_ELIZA_CLOUD_HOST_ALIASES.has(host)) {
+      parsed.hostname = "www.elizacloud.ai";
+      parsed.pathname = "";
+    }
+    return parsed.toString().replace(/\/{1,1024}$/, "");
+  } catch {
+    const safeCandidate = raw.length > 8192 ? raw.slice(0, 8192) : raw;
+    return safeCandidate
+      .replace(/\/api\/v1\/?$/, "")
+      .replace(/\/{1,1024}$/, "");
+  }
+}
+
 export function normalizeElizaCloudBaseUrl(raw?: string): string {
-  return resolveCloudApiBaseUrl(raw || resolveCloudApiBaseUrl());
+  const explicitBaseUrl = raw?.trim();
+  if (!explicitBaseUrl) {
+    return resolveCloudApiBaseUrl();
+  }
+  return `${normalizeExplicitElizaCloudSiteUrl(explicitBaseUrl)}/api/v1`;
 }
 
 export function buildProviderNoResponseMessage(
@@ -20,6 +74,9 @@ export function buildProviderNoResponseMessage(
   }
   if (provider === "claude-code") {
     return `I couldn't get a usable response from Claude Code (${model}). Run \`${displayCommand("/accounts doctor")}\` to verify the linked account, then \`${displayCommand("/accounts connect claude-code")}\` if it needs a rebind.`;
+  }
+  if (provider === "devin") {
+    return `I couldn't get a usable response from Devin (${model}). Run \`${displayCommand("/accounts doctor")}\` to verify the local Devin login, then \`${displayCommand("/accounts connect devin")}\` if it needs a rebind.`;
   }
   if (provider === "openai") {
     return `I couldn't get a usable response from OpenAI (${model}). Check \`OPENAI_API_KEY\` or switch to a linked provider with \`${displayCommand("/accounts")}\`.`;
@@ -96,7 +153,11 @@ export function buildProviderFailureMessage(
     if (provider === "elizacloud") {
       return `Eliza Cloud (${model}) rejected this request as unauthorized. Run \`${displayCommand("/accounts doctor")}\`, then \`${displayCommand("/accounts connect elizacloud")}\` or \`elizaos login\` to refresh the managed bond.`;
     }
-    if (provider === "codex" || provider === "claude-code") {
+    if (
+      provider === "codex" ||
+      provider === "claude-code" ||
+      provider === "devin"
+    ) {
       return `The linked ${provider} session for ${model} is no longer authorized. Run \`${displayCommand(`/accounts connect ${provider}`)}\` after refreshing the local login.`;
     }
   }

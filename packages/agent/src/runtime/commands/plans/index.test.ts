@@ -36,4 +36,21 @@ describe("plans command router", () => {
     expect(plans).toContain('"plan-1"');
     expect(plan).toContain('"title": "Ship it"');
   });
+
+  it("supports Doolittle-native todo aliases on top of native plans", async () => {
+    const context = {
+      runtime: createRuntime(),
+    } as unknown as AgentExecutionContext;
+
+    const todos = await handlePlansCommand("/todo list", context);
+    const todo = await handlePlansCommand(
+      "/todo add Operator loop :: Make retry and undo feel first-class",
+      context,
+    );
+    const shown = await handlePlansCommand("/todo show plan-2", context);
+
+    expect(todos).toContain('"plan-1"');
+    expect(todo).toContain('"title": "Operator loop"');
+    expect(shown).toContain('"id": "plan-2"');
+  });
 });

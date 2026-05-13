@@ -1,4 +1,5 @@
 import type {
+  SessionExchangeMutationResult,
   SessionSearchResult,
   SessionSummary,
   SessionUsageSummary,
@@ -14,6 +15,10 @@ import type {
 
 export interface SessionServiceApi {
   storeMessage(message: StoredMessage): void;
+  deleteLatestExchange(
+    sessionId: string,
+    options?: { skipSlashCommands?: boolean },
+  ): SessionExchangeMutationResult;
   onActivity(
     listener: (event: SessionMessageActivityEvent) => void,
   ): () => void;

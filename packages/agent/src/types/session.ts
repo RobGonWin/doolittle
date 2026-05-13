@@ -15,6 +15,13 @@ export interface SessionSearchResult {
   text: string;
 }
 
+export interface SessionExchangeMutationResult {
+  sessionId: string;
+  userMessage?: StoredMessage;
+  assistantMessages: StoredMessage[];
+  deletedMessages: number;
+}
+
 export interface SessionSummary {
   sessionId: string;
   title?: string;

@@ -11,7 +11,7 @@ describe("trajectory shared", () => {
   it("parses trajectory option tokens", () => {
     expect(
       parseTrajectoryArgs(
-        "session:abc role:user limit:12 label:demo purpose:study mode:evaluation tags:a,b notes:daily rubric:quality,latency",
+        "session:abc role:user limit:12 label:demo purpose:study mode:evaluation tags:a,b notes:daily rubric:quality,latency events:false kind:event event:model.response category:model run:run-a",
       ),
     ).toEqual({
       sessionId: "abc",
@@ -23,6 +23,11 @@ describe("trajectory shared", () => {
       tags: ["a", "b"],
       notes: "daily",
       rubric: ["quality", "latency"],
+      includeEvents: false,
+      recordKind: "event",
+      event: "model.response",
+      category: "model",
+      runId: "run-a",
     });
   });
 

@@ -50,6 +50,14 @@ describe("linked-provider-accounts messages", () => {
         fallbackReady: true,
         detail: "Claude fallback ready.",
       },
+      devin: {
+        provider: "devin",
+        available: true,
+        reusable: false,
+        nativeReady: false,
+        fallbackReady: false,
+        detail: "Devin available.",
+      },
       elizaCloud: {
         provider: "elizacloud",
         available: true,

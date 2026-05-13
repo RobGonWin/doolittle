@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface PublishArgs {
-  provider: "codex" | "claude-code" | "all";
+  provider: "codex" | "claude-code" | "devin" | "all";
   dryRun: boolean;
   json: boolean;
   tag: string;
@@ -13,7 +13,7 @@ interface PublishArgs {
 }
 
 interface PublishResult {
-  provider: "codex" | "claude-code";
+  provider: "codex" | "claude-code" | "devin";
   packageName: string;
   version: string;
   packagePath: string;
@@ -38,7 +38,12 @@ function parseArgs(argv: string[]): PublishArgs {
     const arg = argv[index];
     if (arg === "--provider") {
       const value = argv[index + 1]?.trim().toLowerCase();
-      if (value === "codex" || value === "claude-code" || value === "all") {
+      if (
+        value === "codex" ||
+        value === "claude-code" ||
+        value === "devin" ||
+        value === "all"
+      ) {
         provider = value;
         index += 1;
       }
@@ -78,11 +83,11 @@ function repoRoot() {
 
 function getProviders(
   provider: PublishArgs["provider"],
-): Array<"codex" | "claude-code"> {
-  return provider === "all" ? ["codex", "claude-code"] : [provider];
+): Array<"codex" | "claude-code" | "devin"> {
+  return provider === "all" ? ["codex", "claude-code", "devin"] : [provider];
 }
 
-function providerPath(provider: "codex" | "claude-code"): string {
+function providerPath(provider: "codex" | "claude-code" | "devin"): string {
   return join(repoRoot(), "packages", "plugins", `plugin-${provider}`);
 }
 

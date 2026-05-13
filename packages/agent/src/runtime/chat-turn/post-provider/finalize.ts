@@ -1,15 +1,13 @@
 import type { AgentExecutionContext, AgentTurnHooks } from "@/runtime/chat";
 import { buildProviderNoResponseMessage } from "@/runtime/linked-provider-accounts";
-import { isSimpleGreetingMessage } from "@/runtime/turn-classification/message";
 import type { ChatTurnRequest } from "@/types/runtime";
-import { writeInformationalResponseCache } from "../cache";
 import {
   getContextUsageWarning,
   maybeGetSkillSynthesisNudge,
 } from "../finalization";
-import { buildSimpleGreetingReply } from "../response-shaping";
 import type { TurnState } from "../state";
 import { storeSessionMessage } from "../state";
+import { recordTrajectoryEvent } from "../trajectory";
 import type {
   PostProviderFinalResult,
   PostProviderSettingsSnapshot,
@@ -23,14 +21,6 @@ export function buildPostProviderFinalResponse(input: {
   settingsDuring: PostProviderSettingsSnapshot;
 }): string {
   const normalizedResponse = input.response.trim();
-
-  if (
-    input.runFailureMessage &&
-    input.observedActionCount === 0 &&
-    isSimpleGreetingMessage(input.effectiveInput.message)
-  ) {
-    return buildSimpleGreetingReply(input.effectiveInput.message);
-  }
 
   return (
     normalizedResponse ||
@@ -82,31 +72,40 @@ export async function emitPostProviderNotices(input: {
 export function finalizePostProviderTurn(input: {
   context: AgentExecutionContext;
   turn: TurnState;
-  responseCacheKey?: string;
   finalResponse: string;
   runFailureMessage?: string;
   observedActionCount: number;
   usedFallback: boolean;
+  settingsDuring: PostProviderSettingsSnapshot;
   scheduleProfileObservation: () => void;
 }): PostProviderFinalResult {
-  if (
-    input.responseCacheKey &&
-    !input.runFailureMessage &&
-    input.observedActionCount === 0 &&
-    input.finalResponse.trim()
-  ) {
-    writeInformationalResponseCache(
-      input.responseCacheKey,
-      input.finalResponse,
-    );
-  }
-
   storeSessionMessage(input.context, {
     sessionId: input.turn.sessionId,
     roomId: input.turn.roomId,
     entityId: input.turn.entityId,
     role: "assistant",
     text: input.finalResponse,
+  });
+  const modelSettings = input.settingsDuring.model ?? {};
+  recordTrajectoryEvent(input.context, {
+    category: "turn",
+    event: input.runFailureMessage ? "turn.failed" : "turn.completed",
+    sessionId: input.turn.sessionId,
+    runId: input.turn.runId,
+    roomId: String(input.turn.roomId),
+    source: input.turn.connectionSource,
+    provider: modelSettings.provider ?? "unknown",
+    model: modelSettings.model ?? "unknown",
+    text: `[turn:${
+      input.runFailureMessage ? "failed" : "completed"
+    }] ${input.finalResponse}`,
+    metadata: {
+      response: input.finalResponse,
+      responseChars: input.finalResponse.length,
+      observedActionCount: input.observedActionCount,
+      usedFallback: input.usedFallback,
+      runFailureMessage: input.runFailureMessage,
+    },
   });
 
   input.context.services.runController.finishTurn(

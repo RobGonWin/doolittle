@@ -22,6 +22,7 @@ export interface BootstrapOnboardingSummary {
     provider: string | null;
   };
   accounts: {
+    devinLinked?: boolean;
     codexLinked: boolean;
     claudeCodeLinked: boolean;
   };
@@ -43,6 +44,7 @@ export function buildBootstrapCheckSummary(args: {
   createdDirs: string[];
   dependencyProbes: BootstrapDependencyProbeSummary[];
   envMessages: string[];
+  files: string[];
 }): string {
   return [
     "Doolittle bootstrap",
@@ -50,6 +52,9 @@ export function buildBootstrapCheckSummary(args: {
     "",
     "Directories:",
     ...args.createdDirs.map((entry) => `- ${entry}`),
+    "",
+    "Files:",
+    ...args.files.map((entry) => `- ${entry}`),
     "",
     "Preflight:",
     ...args.dependencyProbes.map(
@@ -81,7 +86,7 @@ export function buildBootstrapPulseSummary(args: {
       `cadence: ${onboarding.agent.runDepth} cap=${onboarding.agent.maxIterations} progress=${onboarding.agent.toolProgressMode}`,
       `onboarding: ${onboarding.nativeOnboarding.complete ? "native-aligned" : "mirror-warn"} (${onboarding.nativeOnboarding.currentStep})`,
       `native connection: ${onboarding.nativeConnection.kind}${onboarding.nativeConnection.provider ? ` via ${onboarding.nativeConnection.provider}` : ""}`,
-      `threads: codex=${onboarding.accounts.codexLinked ? "bound" : "idle"} claude=${onboarding.accounts.claudeCodeLinked ? "bound" : "idle"}`,
+      `threads: devin=${onboarding.accounts.devinLinked ? "bound" : "idle"} codex=${onboarding.accounts.codexLinked ? "bound" : "idle"} claude=${onboarding.accounts.claudeCodeLinked ? "bound" : "idle"}`,
       `channels: ${onboarding.transports.join(", ") || "api, cli only"}`,
       `pulseprint: ${onboarding.profile}`,
     ],

@@ -8,6 +8,8 @@ import type {
   TrajectoryComparisonBundle,
   TrajectoryCompressionBundle,
   TrajectoryEvaluationBundle,
+  TrajectoryEventInput,
+  TrajectoryEventRecord,
   TrajectoryExportOptions,
   TrajectoryGatewayIngestBundle,
   TrajectoryReplayResult,
@@ -27,6 +29,11 @@ import type {
 } from "../service-types";
 
 export interface TrajectoryServiceApi {
+  recordEvent(input: TrajectoryEventInput): TrajectoryEventRecord;
+  recentEvents(
+    limit?: number,
+    filters?: TrajectoryExportOptions,
+  ): TrajectoryEventRecord[];
   exportRecent(limit?: number): string;
   exportDataset(options?: TrajectoryExportOptions): string;
   exportBundle(limit?: number): TrajectoryServiceBundleArtifacts;

@@ -1,1 +1,5 @@
-export type LinkedProviderName = "elizacloud" | "codex" | "claude-code";
+export type LinkedProviderName =
+  | "elizacloud"
+  | "codex"
+  | "claude-code"
+  | "devin";

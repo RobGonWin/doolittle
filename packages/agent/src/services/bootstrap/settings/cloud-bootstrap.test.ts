@@ -176,6 +176,12 @@ function createLinkedAccounts(
       reusable: false,
       detail: "claude",
     },
+    devin: {
+      provider: "devin",
+      available: false,
+      reusable: false,
+      detail: "devin",
+    },
     elizaCloud: {
       provider: "elizacloud",
       available: false,
@@ -258,6 +264,49 @@ describe("cloud bootstrap helpers", () => {
     expect(updates).toContainEqual([
       "model.baseUrl",
       "https://chatgpt.com/backend-api/codex",
+    ]);
+  });
+
+  it("moves stale linked-provider settings to local Ollama when linked auth is not selected", () => {
+    const config = createConfig({
+      ollamaApiEndpoint: "http://localhost:11434/api",
+      ollamaLargeModel: "granite4.1:3b",
+      useLinkedCodexAuth: false,
+    });
+    const currentSettings = createCurrentSettings();
+    currentSettings.model.provider = "codex";
+    currentSettings.model.model = "gpt-5.4";
+    currentSettings.model.baseUrl = "https://chatgpt.com/backend-api/codex";
+    const linkedAccounts = createLinkedAccounts({
+      codex: {
+        provider: "codex",
+        available: true,
+        reusable: true,
+        nativeReady: true,
+        detail: "codex ready",
+      },
+    });
+    const updates: Array<[string, unknown]> = [];
+
+    applyProviderBootstrapFallbacks(
+      config,
+      currentSettings,
+      linkedAccounts,
+      resolvePersistedProviderAvailability(
+        config,
+        currentSettings,
+        linkedAccounts,
+      ),
+      ((path: string, value: unknown) => {
+        updates.push([path, value]);
+      }) as never,
+    );
+
+    expect(updates).toContainEqual(["model.provider", "ollama"]);
+    expect(updates).toContainEqual(["model.model", "granite4.1:3b"]);
+    expect(updates).toContainEqual([
+      "model.baseUrl",
+      "http://localhost:11434/api",
     ]);
   });
 });

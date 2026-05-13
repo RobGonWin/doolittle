@@ -36,6 +36,10 @@ const baseAnswers: WizardAnswers = {
   elizaCloudSmallModel: "",
   elizaCloudModel: "",
   elizaCloudEmbeddingModel: "",
+  ollamaApiEndpoint: "http://localhost:11434/api",
+  ollamaSmallModel: "granite4.1:3b",
+  ollamaLargeModel: "granite4.1:3b",
+  ollamaEmbeddingModel: "nomic-embed-text:latest",
   anthropicApiKey: "",
   useLinkedClaudeCodeAuth: false,
   claudeCodeCliFallback: false,
@@ -75,6 +79,14 @@ const linkedAccounts = {
     fallbackReady: false,
     detail: "claude",
   },
+  devin: {
+    provider: "devin",
+    available: false,
+    reusable: false,
+    nativeReady: false,
+    fallbackReady: false,
+    detail: "devin",
+  },
   elizaCloud: {
     provider: "elizacloud",
     available: false,
@@ -100,7 +112,7 @@ describe("bootstrap answer review helpers", () => {
         codex: { nativeReady: true, reusable: false },
         claudeCode: { nativeReady: false, reusable: true },
       } as never),
-    ).toEqual({ codex: true, claudeCode: true });
+    ).toEqual({ devin: false, codex: true, claudeCode: true });
   });
 
   it("falls back openai to linked codex when no api key is provided", () => {

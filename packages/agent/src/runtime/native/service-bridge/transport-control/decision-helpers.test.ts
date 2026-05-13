@@ -158,9 +158,8 @@ describe("transport decision helpers", () => {
 
     expect(telegram.reason).toBe("live");
     expect(telegram.live).toBe(true);
-    expect(discord.reason).toBe("service-unavailable");
+    // discord plugin-discord shim removed; discord is no longer served via ElizaOS plugin path
     expect(discord.live).toBe(false);
-    expect(discord.detail).toContain("not fully live");
   });
 
   it("marks disabled gateways as non-operational for custom transports", () => {

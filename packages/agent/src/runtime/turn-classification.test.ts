@@ -13,6 +13,7 @@ describe("turn classification", () => {
   it("treats common conversational greetings as simple chat", () => {
     expect(isSimpleGreetingMessage("hey there")).toBe(true);
     expect(isSimpleGreetingMessage("hello there")).toBe(true);
+    expect(isSimpleGreetingMessage("hey there Doolittle")).toBe(true);
 
     const greeting = classifyTurnMessage("hey there");
     expect(greeting.simpleChat).toBe(true);
@@ -22,6 +23,7 @@ describe("turn classification", () => {
 
   it("treats short social turns as simple chat", () => {
     expect(isSimpleSocialMessage("How are you today")).toBe(true);
+    expect(isSimpleSocialMessage("How is your night?")).toBe(true);
     expect(isSimpleSocialMessage("thanks")).toBe(true);
 
     const social = classifyTurnMessage("How are you today");

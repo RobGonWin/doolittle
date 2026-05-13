@@ -154,6 +154,12 @@ function createLinkedAccounts(
       reusable: false,
       detail: "claude",
     },
+    devin: {
+      provider: "devin",
+      available: false,
+      reusable: false,
+      detail: "devin",
+    },
     elizaCloud: {
       provider: "elizacloud",
       available: false,

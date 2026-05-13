@@ -137,14 +137,14 @@ describe("tui render helpers", () => {
     expect(content).toContain("workspace {cyan-fg}doolittle{/}");
     expect(content).toContain("openai");
     expect(content).toContain(
-      "startup warming · deferred ready · diagnostics:warming",
+      "startup warming · background ready · diagnostics:warming",
     );
     expect(content).toContain("live running");
     expect(content).toContain("plugins enabled ");
-    expect(content).toContain("prod 3");
-    expect(content).toContain("alpha 22");
+    expect(content).toContain("prod 2");
+    expect(content).toContain("alpha 10");
     expect(content).toContain("exp 1");
-    expect(content).toContain("runtime {gray-fg}2.0.0-alpha.85{/}");
+    expect(content).toContain("runtime {gray-fg}2.0.0-alpha.537{/}");
     expect(content).toContain("gateway sessions 2 · voice 1");
     expect(content).toContain("Current cockpit session");
     expect(content).toContain("Synthesized a router extraction helper.");

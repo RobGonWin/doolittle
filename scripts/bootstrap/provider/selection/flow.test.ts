@@ -31,6 +31,10 @@ function createAnswers(overrides: Partial<WizardAnswers> = {}): WizardAnswers {
     elizaCloudSmallModel: "gpt-5.4-mini",
     elizaCloudModel: "gpt-5.4",
     elizaCloudEmbeddingModel: "text-embedding-3-large",
+    ollamaApiEndpoint: "http://localhost:11434/api",
+    ollamaSmallModel: "granite4.1:3b",
+    ollamaLargeModel: "granite4.1:3b",
+    ollamaEmbeddingModel: "nomic-embed-text:latest",
     anthropicApiKey: "",
     useLinkedClaudeCodeAuth: false,
     claudeCodeCliFallback: false,
@@ -125,6 +129,7 @@ describe("provider selection flow", () => {
 
     mock.module("../../core/prompt-ops", () => ({
       ask,
+      askYesNo: mock(async () => true),
       askSecret,
       chooseOne,
     }));
@@ -221,6 +226,7 @@ describe("provider selection flow", () => {
 
     mock.module("../../core/prompt-ops", () => ({
       ask,
+      askYesNo: mock(async () => true),
       askSecret,
       chooseOne,
     }));
@@ -268,5 +274,88 @@ describe("provider selection flow", () => {
     expect(answers.anthropicApiKey).toBe("anthropic-key");
     expect(answers.openaiModel).toBe("gpt-5.4");
     expect(answers.anthropicModel).toBe("claude-sonnet-4");
+  });
+
+  it("collects local Ollama endpoint and model routing without provider secrets", async () => {
+    const askPrompts: string[] = [];
+    const ask = mock(
+      async (
+        _context: unknown,
+        _rl: unknown,
+        prompt: string,
+        currentValue: string,
+      ) => {
+        askPrompts.push(prompt);
+        if (prompt.includes("endpoint")) {
+          return "http://127.0.0.1:11434/api";
+        }
+        if (prompt.includes("small")) {
+          return "qwen2.5-coder:7b";
+        }
+        if (prompt.includes("large")) {
+          return "llama3.3:70b";
+        }
+        if (prompt.includes("embedding")) {
+          return "nomic-embed-text:latest";
+        }
+        return currentValue;
+      },
+    );
+    const askSecret = mock(async () => {
+      throw new Error("askSecret should not run for local Ollama selection");
+    });
+    const chooseOne = mock(async () => "ollama");
+
+    mock.module("../../core/prompt-ops", () => ({
+      ask,
+      askYesNo: mock(async () => true),
+      askSecret,
+      chooseOne,
+    }));
+    mock.module("../../wizard/state", () => ({
+      resolveInteractiveProviderDefault: () => "ollama",
+    }));
+    mock.module("./branches/eliza-cloud", () => ({
+      runElizaCloudProviderBranch: mock(
+        async ({ linkedAccounts }: never) => linkedAccounts,
+      ),
+    }));
+    mock.module("./branches/codex", () => ({
+      runCodexProviderBranch: mock(
+        async ({ linkedAccounts }: never) => linkedAccounts,
+      ),
+    }));
+    mock.module("./branches/claude-code", () => ({
+      runClaudeCodeProviderBranch: mock(
+        async ({ linkedAccounts }: never) => linkedAccounts,
+      ),
+    }));
+
+    const { runProviderSelectionFlow } = await loadFlowModule();
+    const { context } = createContext();
+    const answers = createAnswers();
+
+    await runProviderSelectionFlow(
+      context,
+      {} as never,
+      new Map(),
+      answers,
+      createLinkedAccounts(),
+    );
+
+    expect(chooseOne).toHaveBeenCalledTimes(1);
+    expect(ask).toHaveBeenCalledTimes(4);
+    expect(askSecret).not.toHaveBeenCalled();
+    expect(askPrompts).toEqual([
+      "Which Ollama API endpoint should I use",
+      "Which local small model should I use",
+      "Which local large model should lead my first sessions",
+      "Which local embedding model should I use",
+    ]);
+    expect(answers.provider).toBe("ollama");
+    expect(answers.ollamaApiEndpoint).toBe("http://127.0.0.1:11434/api");
+    expect(answers.ollamaSmallModel).toBe("qwen2.5-coder:7b");
+    expect(answers.ollamaLargeModel).toBe("llama3.3:70b");
+    expect(answers.ollamaEmbeddingModel).toBe("nomic-embed-text:latest");
   });
 });

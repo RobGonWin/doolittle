@@ -22,9 +22,17 @@ export interface EnvConfig {
   elizaCloudEmbeddingUrl?: string;
   elizaCloudEmbeddingApiKey?: string;
   elizaCloudEmbeddingDimensions?: number;
+  ollamaApiEndpoint: string;
+  ollamaSmallModel: string;
+  ollamaLargeModel: string;
+  ollamaEmbeddingModel: string;
   openAiApiKey?: string;
   offlineBootstrapMode: boolean;
   useLinkedCodexAuth: boolean;
+  useLinkedDevinAuth: boolean;
+  devinCliCommand: string;
+  devinModel: string;
+  devinTimeoutMs: number;
   openAiBaseUrl: string;
   openAiModel: string;
   openAiImageModel?: string;

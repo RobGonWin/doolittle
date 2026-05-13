@@ -19,6 +19,10 @@ interface ElizaCloudLoginPollResult {
   apiKey?: string;
 }
 
+interface ElizaCloudLoginFlowDependencies {
+  openBrowser?: (url: string) => Promise<boolean>;
+}
+
 async function tryOpenBrowser(url: string): Promise<boolean> {
   const isWindows = platform() === "win32";
   const isMac = platform() === "darwin";
@@ -95,6 +99,7 @@ export async function runElizaCloudLoginFlow(
   context: BootstrapWizardContext,
   label: string,
   baseUrl = "https://www.elizacloud.ai",
+  dependencies: ElizaCloudLoginFlowDependencies = {},
 ): Promise<string | undefined> {
   const snapshot = suspendWizardScreen(context);
 
@@ -129,7 +134,9 @@ export async function runElizaCloudLoginFlow(
         "I will keep waiting here while the Eliza Cloud login completes.",
       );
       announcedBrowser = true;
-      void tryOpenBrowser(session.browserUrl).then((opened) => {
+      void (dependencies.openBrowser ?? tryOpenBrowser)(
+        session.browserUrl,
+      ).then((opened) => {
         if (!opened) {
           context.warn(
             "I could not confirm an automatic browser launch. Use the URL above to continue the Cloud login manually.",

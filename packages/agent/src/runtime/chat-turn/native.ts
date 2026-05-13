@@ -3,7 +3,7 @@ import type { ChatTurnRequest, CronJobRuntimeOverrides } from "@/types/runtime";
 import { executeApprovedDirectLocalIntent } from "./local-intent-orchestration/approval";
 import { runPreferredLocalIntentFastPath } from "./local-intent-orchestration/fast-path";
 import { runNativeProviderStage } from "./native/provider-stage";
-import { handleSimpleGreetingTurn } from "./native/shortcuts";
+import { handleDirectInformationalModelTurn } from "./native/shortcuts";
 import type {
   NativeTurnSetup,
   SettingsSnapshot,
@@ -32,17 +32,19 @@ export async function runNativeMessageTurn(input: {
   const turn = input.turnSetup.turn;
   const scheduleProfileObservation = input.turnSetup.scheduleProfileObservation;
 
-  const greetingResponse = await handleSimpleGreetingTurn({
+  const directInformationalResponse = await handleDirectInformationalModelTurn({
     context: input.context,
     turn,
+    userId: input.effectiveInput.userId,
     message: input.effectiveInput.message,
+    classification: input.turnSetup.turnClassification,
     scheduleProfileObservation,
     options: input.options,
     perf: input.perf,
     source: input.input.source,
   });
-  if (greetingResponse) {
-    return greetingResponse;
+  if (directInformationalResponse) {
+    return directInformationalResponse;
   }
 
   const preferredLocalIntentFastPath = await runPreferredLocalIntentFastPath({

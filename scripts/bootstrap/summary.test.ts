@@ -13,10 +13,18 @@ describe("bootstrap summary builders", () => {
         { label: "Docker", installed: false },
       ],
       envMessages: [".env already exists"],
+      files: [
+        ".env",
+        ".doolittle/settings.json",
+        ".doolittle/gateway/gateway.json",
+      ],
     });
 
     expect(summary).toContain("Doolittle bootstrap");
     expect(summary).toContain("- .doolittle");
+    expect(summary).toContain("- .env");
+    expect(summary).toContain("- .doolittle/settings.json");
+    expect(summary).toContain("- .doolittle/gateway/gateway.json");
     expect(summary).toContain("- Bun runtime: online");
     expect(summary).toContain("- Docker: missing");
     expect(summary).toContain("- .env already exists");

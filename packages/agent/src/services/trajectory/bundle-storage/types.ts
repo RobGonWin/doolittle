@@ -1,6 +1,8 @@
 import type {
   GatewayMessageLike,
   GatewayTraceLike,
+  TrajectoryEventRecord,
+  TrajectoryFilters,
 } from "../../../types/trajectory";
 import type { SessionService } from "../../session/service";
 
@@ -9,6 +11,9 @@ export type TrajectoryBundleMode = "dataset" | "research" | "evaluation" | "rl";
 export interface TrajectoryBundleStorageHost {
   baseDir: string;
   sessions: Pick<SessionService, "recent">;
+  eventJournal?: {
+    recent(limit: number, filters?: TrajectoryFilters): TrajectoryEventRecord[];
+  };
   slug(value: string): string;
 }
 

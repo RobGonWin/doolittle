@@ -16,5 +16,8 @@ export function resolveLinkedProviderName(
   if (value === "claude-code" || value === "claude" || value === "claudecode") {
     return "claude-code";
   }
+  if (value === "devin" || value === "swe" || value === "windsurf") {
+    return "devin";
+  }
   return undefined;
 }

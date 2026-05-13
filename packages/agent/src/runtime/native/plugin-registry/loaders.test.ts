@@ -3,10 +3,6 @@ import type { Plugin } from "@elizaos/core";
 import type { AppServices } from "../../../services";
 import type { EnvConfig } from "../../../types/runtime";
 import {
-  getNativePluginCatalog,
-  groupNativePluginCatalog,
-} from "../plugin-catalog";
-import {
   createEmptyDeferredPluginGroups,
   loadDeferredPluginGroups,
 } from "./deferred-groups";
@@ -130,35 +126,22 @@ describe("createEmptyDeferredPluginGroups", () => {
   it("returns empty arrays for every deferred category", () => {
     expect(createEmptyDeferredPluginGroups()).toEqual({
       messaging: [],
-      knowledge: [],
-      browser: [],
-      media: [],
       research: [],
       execution: [],
-      integration: [],
-      automation: [],
     });
   });
 });
 
 describe("loadHotExecutionPlugins", () => {
   it("builds the expected hot execution plugin set", async () => {
-    const config = createConfig();
-    const catalog = getNativePluginCatalog(config);
-    const groupedCatalog = groupNativePluginCatalog(catalog);
-
     const plugins = await loadHotExecutionPlugins(
       createServices(),
-      config,
-      catalog,
-      groupedCatalog,
+      createConfig(),
     );
 
     expect(pluginNames(plugins)).toEqual([
-      "shell",
-      "coding-agent",
-      "agent-orchestrator",
-      "plugin-manager",
+      "@doolittle/plugin-coding-agent",
+      "@doolittle/plugin-agent-orchestrator",
       "@elizaos/plugin-planning",
     ]);
   });
@@ -171,23 +154,14 @@ describe("loadDeferredPluginGroups", () => {
       createConfig(),
     );
 
-    expect(pluginNames(groups.messaging)).toEqual(["discord"]);
-    expect(pluginNames(groups.knowledge)).toEqual(["knowledge"]);
-    expect(pluginNames(groups.browser)).toEqual(["browser"]);
-    expect(pluginNames(groups.media)).toEqual(["@elizaos/plugin-tts"]);
+    expect(pluginNames(groups.messaging)).toEqual([]);
     expect(pluginNames(groups.research)).toEqual([
-      "@elizaos/plugin-action-bench",
-      "@elizaos/plugin-autocoder",
+      "@doolittle/plugin-action-bench",
+      "@doolittle/plugin-autocoder",
     ]);
     expect(pluginNames(groups.execution)).toEqual([
       "@elizaos/plugin-e2b",
       "@elizaos/plugin-forms",
-    ]);
-    expect(pluginNames(groups.integration)).toEqual(["mcp"]);
-    expect(pluginNames(groups.automation)).toEqual([
-      "cron",
-      "agent-skills",
-      "trajectory-logger",
     ]);
   });
 });

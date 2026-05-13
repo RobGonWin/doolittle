@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { RunControllerService } from "../run-controller-service";
 import { TrajectoryService } from "./index";
 
 describe("TrajectoryService", () => {
@@ -235,6 +236,99 @@ describe("TrajectoryService", () => {
       expect((await service.runLatestBenchmark())?.label).toBe(
         "replay-benchmark",
       );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("persists run and decision events into exported trajectory bundles", () => {
+    const root = mkdtempSync(join(tmpdir(), "doolittle-trajectory-events-"));
+    const sessions = {
+      recent() {
+        return [
+          {
+            sessionId: "session-a",
+            createdAt: "2026-03-20T00:00:00.000Z",
+            role: "user" as const,
+            text: "Can you inspect Twitter integration?",
+          },
+          {
+            sessionId: "session-a",
+            createdAt: "2026-03-20T00:00:01.000Z",
+            role: "assistant" as const,
+            text: "I will inspect the workspace.",
+          },
+        ];
+      },
+    };
+    const runController = new RunControllerService();
+    const service = new TrajectoryService(
+      root,
+      sessions as never,
+      undefined,
+      runController,
+    );
+
+    try {
+      service.recordEvent({
+        category: "turn",
+        event: "turn.classified",
+        sessionId: "session-a",
+        runId: "run-a",
+        text: "[turn:classified] profile=single-step",
+        metadata: {
+          apiKey: "should-not-leak",
+          maxTokens: 128,
+          classification: { informationalOnly: true },
+        },
+      });
+      runController.startTurn({
+        sessionId: "session-a",
+        roomId: "room-a",
+        runId: "run-a",
+        source: "cli",
+        message: "Could you run your own twitter account?",
+        runDepth: "standard",
+        configuredMaxIterations: 4,
+        progressMode: "all",
+      });
+      runController.noteActionStarted("session-a", "DOOLITTLE_WORKSPACE");
+      runController.noteActionCompleted("session-a", "DOOLITTLE_WORKSPACE");
+      runController.finishTurn("session-a", "complete");
+
+      const events = service.recentEvents(10, { sessionId: "session-a" });
+      expect(events.length).toBeGreaterThanOrEqual(4);
+      expect(events.some((event) => event.event === "run.action-started")).toBe(
+        true,
+      );
+      expect(events[0]?.metadata).toBeDefined();
+      expect(JSON.stringify(events)).not.toContain("should-not-leak");
+      expect(JSON.stringify(events)).toContain('"maxTokens":128');
+
+      const bundle = service.exportFilteredBundle({
+        sessionId: "session-a",
+        limit: 20,
+        label: "Eventful",
+      });
+      const records = readFileSync(bundle.dataPath, "utf8")
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line) as { kind?: string; event?: string });
+      const manifest = JSON.parse(
+        readFileSync(bundle.manifestPath, "utf8"),
+      ) as {
+        eventCount: number;
+        messageRecordCount: number;
+        recordKindCounts: Record<string, number>;
+      };
+
+      expect(records.some((record) => record.kind === "event")).toBe(true);
+      expect(
+        records.some((record) => record.event === "run.action-started"),
+      ).toBe(true);
+      expect(manifest.eventCount).toBeGreaterThanOrEqual(4);
+      expect(manifest.messageRecordCount).toBe(2);
+      expect(manifest.recordKindCounts.event).toBeGreaterThanOrEqual(4);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

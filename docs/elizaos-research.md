@@ -1,114 +1,92 @@
 # ElizaOS Research Notes
 
-This document captures framework-level findings that matter for expanding Doolittle toward deeper ElizaOS alignment.
+This document captures framework-level findings that matter for keeping Doolittle aligned with the current ElizaOS 2.x architecture.
 
-## Dist-tag status observed on March 19, 2026
+## Package Status Observed On May 9, 2026
 
-- `elizaos@latest` resolved to `2.0.0-alpha.77`
-- `elizaos@alpha` resolved to `2.0.0-alpha.76`
-- `@elizaos/core@latest` resolved to `2.0.0-alpha.77`
-- `@elizaos/plugin-sql@alpha` resolved to `2.0.0-alpha.17`
-- `@elizaos/plugin-bootstrap@latest` resolved to `1.7.2`
-- `@elizaos/plugin-bootstrap@alpha` resolved to `1.7.3-alpha.4`
+Current npm metadata is not lockstep across the ElizaOS package family, so Doolittle should pin package-by-package instead of assuming one shared version.
 
-Implication:
+| Package | npm `latest` | npm `alpha` | Doolittle strategy |
+| --- | --- | --- | --- |
+| `elizaos` | `1.7.2` | `2.0.0-alpha.535` | Use explicit alpha |
+| `@elizaos/core` | `1.7.2` | `2.0.0-alpha.537` | Use explicit alpha |
+| `@elizaos/agent` | `0.25.9` | `2.0.0-alpha.537` | Use explicit alpha |
+| `@elizaos/skills` | `2.0.0-alpha.77` | `2.0.0-alpha.539` | Use explicit alpha |
+| `@elizaos/autonomous` | `2.0.0-alpha.77` | `2.0.0-alpha.85` | Keep current alpha, because no newer alpha is published |
+| `@elizaos/plugin-openai` | `1.6.0` | `2.0.0-alpha.537` | Use explicit alpha |
+| `@elizaos/plugin-sql` | `1.7.2` | `2.0.0-alpha.20` | Keep workspace compatibility wrapper around the newest published alpha |
 
-- The ElizaOS ecosystem is not publishing every package in lockstep.
-- Tag selection should be validated package-by-package, not assumed globally.
-- `@elizaos/plugin-sql@alpha` was required for runtime compatibility with `@elizaos/core@latest` in this repo.
+Implications:
 
-## Core architectural findings
+- The 2.x runtime line still lives behind explicit alpha tags for the core runtime packages.
+- Several official plugins have reached `2.0.0-alpha.537`, but some packages, such as SQL and autonomous, have their own latest available alpha.
+- Workspace wrappers are still valuable where Doolittle needs compatibility patches or plugins that are not published as official npm packages.
 
-### 1. Runtime-centered architecture
+## Current Architecture Findings
 
-ElizaOS is centered around `AgentRuntime` from `@elizaos/core`.
+### 1. The New `ElizaOS` Orchestrator Is A Better Harness Boundary
+
+The current runtime docs show `ElizaOS` handling plugin resolution, multi-agent orchestration, `addAgents`, `startAgents`, `handleMessage`, streaming callbacks, events, and health checks.
 
 What that means for Doolittle:
 
-- character, plugins, and runtime settings should remain the center of the app
-- HTTP, CLI, gateway, and scheduling layers should wrap the runtime rather than replace it
+- Doolittle should keep shrinking toward a harness around ElizaOS runtime orchestration.
+- Local CLI, gateway, browser, account linking, and diagnostics should wrap the runtime instead of becoming a parallel agent framework.
+- The Doolittle value layer is operator ergonomics, provider/account bridges, native local execution, and harness policy.
 
-### 2. Services are the native long-running integration model
+### 2. Runtime-Centered Design Is Still Correct
 
-Official documentation and installed type definitions both show that ElizaOS expects long-lived integrations to be implemented as `Service` subclasses.
+ElizaOS is still centered around `AgentRuntime` and plugin-loaded runtime capabilities.
 
-Relevant framework contract from the installed `@elizaos/core` types:
+What that means for Doolittle:
 
-- `Service` has a static `start(runtime)` lifecycle
-- `Service` instances are singleton-like per runtime
-- services are where persistent connections, background processes, and integration state belong
+- character, plugins, model settings, memory, and message processing should remain the center of the app
+- HTTP, CLI, gateway, and scheduling layers should adapt into runtime messages and services
+- app code should avoid duplicating runtime orchestration where the SDK now owns it
 
-Implication for Doolittle:
+### 3. Services Are The Native Long-Running Integration Model
 
-- gateway, background schedulers, delivery routers, and adapter lifecycles should eventually be promoted from standalone app services into ElizaOS plugin services
-
-### 3. Task workers are the native recurring-job mechanism
-
-The official services documentation describes a built-in task system:
-
-- runtime task workers are registered in memory
-- tasks are persisted
-- recurring tasks use metadata such as `updateInterval`
+Official docs register services through plugins and expose them with `runtime.getService(...)`.
 
 Implication for Doolittle:
 
-- the current custom cron service works, but long-term native experience should move recurring automation toward ElizaOS task workers where possible
-- scheduled reports, sync jobs, and repeating maintenance tasks are strong candidates for native task-worker execution
+- gateway lifecycles, browser/MCP bridges, platform adapters, account refreshers, and background coordination should continue moving into ElizaOS plugin services
+- standalone app services should be treated as harness adapters unless they truly belong outside the runtime
 
-### 4. Message service is the canonical processing path
+### 4. Plugins Are Broader Than Actions
 
-The official examples consistently route input through:
-
-- `runtime.ensureConnection(...)`
-- `createMessageMemory(...)`
-- `runtime.messageService.handleMessage(...)`
+Current plugin docs cover actions, providers, evaluators, services, routes, events, and model handlers.
 
 Implication for Doolittle:
 
-- local CLI, HTTP chat, and gateway-originated messages should keep using this shared pipeline
-- custom platform behavior should adapt into this path instead of bypassing it
+- the Doolittle plugin surface should prefer native plugin components over app-only extension points
+- plugin-provided routes may be a good fit for runtime-owned APIs
+- model/provider wrappers should stay plugin-native so they can benefit from SDK routing and model selection
 
-### 5. Plugin surface is broader than just actions
+## Application Direction For Doolittle
 
-ElizaOS plugins can contribute:
-
-- actions
-- providers
-- evaluators
-- services
-- routes
-- model handlers
-
-Implication for Doolittle:
-
-- today the custom plugin mostly uses actions/providers/evaluators/models
-- deeper native experience work should use `services` for gateway and background work
-- framework-native HTTP `routes` may be useful for parts of the API that belong directly to the runtime
-
-## Application-specific direction for Doolittle
-
-### Good current alignment
-
-The current codebase already aligns well with ElizaOS in several places:
+### Good Current Alignment
 
 - runtime-centered bootstrapping
-- custom plugin for actions/providers/evaluators/models
+- custom Doolittle plugin for actions/providers/evaluators/models
 - SQL-backed runtime initialization
 - canonical message processing path for chat requests
+- workspace wrappers where official package versions lag or Doolittle needs compatibility patches
 
-### Highest-value next refactors
+### Highest-Value Next Refactors
 
-1. Promote gateway lifecycle into real ElizaOS `Service` classes.
-2. Promote recurring automations into task workers where ElizaOS fits cleanly.
-3. Evaluate whether parts of the Bun API should move into plugin-provided runtime routes.
-4. Add transport-specific adapters against the existing gateway abstractions.
-5. Expand model/provider support using official ElizaOS plugins when the published package versions line up cleanly.
+1. Treat Doolittle as the harness around ElizaOS rather than a replacement agent runtime.
+2. Evaluate replacing remaining bespoke runtime boot logic with the `ElizaOS` orchestrator where the alpha SDK now supports it cleanly.
+3. Promote gateway lifecycle and account/provider bridges into real ElizaOS `Service` classes where they are still app-bound.
+4. Move runtime-owned HTTP surfaces into plugin routes when the ownership boundary is clear.
+5. Keep package audit/version tooling explicit about `latest` versus `alpha`, because npm dist-tags are mixed across the ecosystem.
 
-## Sources consulted
+## Sources Consulted
 
 Primary sources:
 
-- Official ElizaOS services documentation: [docs.elizaos.ai/runtime/services](https://docs.elizaos.ai/runtime/services)
-- Official ElizaOS GitHub repository: [github.com/elizaOS/eliza](https://github.com/elizaOS/eliza)
-- Installed `@elizaos/core` type definitions in this workspace
-- npm package metadata for `elizaos`, `@elizaos/core`, `@elizaos/plugin-sql`, and `@elizaos/plugin-bootstrap`
+- ElizaOS core runtime docs: https://docs.elizaos.ai/runtime/core
+- ElizaOS services docs: https://docs.elizaos.ai/runtime/services
+- ElizaOS project docs: https://docs.elizaos.ai/projects/overview
+- ElizaOS plugin reference: https://docs.elizaos.ai/plugins/reference
+- npm package metadata via `npm view` for `elizaos`, `@elizaos/core`, `@elizaos/agent`, `@elizaos/skills`, `@elizaos/autonomous`, `@elizaos/plugin-openai`, and `@elizaos/plugin-sql`

@@ -1,9 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { listNativeCapabilityTruth } from "../../packages/agent/src/runtime/native/capability-truth";
+import { listOperatorWowContract } from "../../packages/agent/src/runtime/native/operator-wow-contract";
 import { buildInventoryRows } from "./inventory";
 import {
   renderCapabilityTruth,
+  renderOperatorWowContract,
   renderPluginInventory,
   renderPluginReadme,
 } from "./render";
@@ -36,6 +38,7 @@ export function runSyncDocTruth(options?: { root?: string; mode?: SyncMode }) {
   const mode = options?.mode ?? "check";
   const inventoryRows = buildInventoryRows(root);
   const capabilityTruth = listNativeCapabilityTruth();
+  const operatorWowContract = listOperatorWowContract();
   const inventoryById = new Map(inventoryRows.map((row) => [row.id, row]));
   const failures = [
     syncFile(
@@ -49,6 +52,12 @@ export function runSyncDocTruth(options?: { root?: string; mode?: SyncMode }) {
       mode,
       "docs/capability-truth.md",
       renderCapabilityTruth(capabilityTruth),
+    ),
+    syncFile(
+      root,
+      mode,
+      "docs/operator-wow-contract.md",
+      renderOperatorWowContract(operatorWowContract),
     ),
   ].filter(Boolean) as string[];
 

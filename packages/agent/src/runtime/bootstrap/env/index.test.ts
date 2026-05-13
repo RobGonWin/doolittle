@@ -152,6 +152,10 @@ describe("bootstrap environment", () => {
         elizaCloudSmallModel: "small-cloud",
         elizaCloudLargeModel: "large-cloud",
         elizaCloudEmbeddingModel: "embed-cloud",
+        ollamaApiEndpoint: "http://localhost:11434/api",
+        ollamaSmallModel: "granite4.1:3b",
+        ollamaLargeModel: "granite4.1:3b",
+        ollamaEmbeddingModel: "nomic-embed-text:latest",
         openAiBaseUrl: "https://openai.example",
         openAiApiKey: "openai-key",
         anthropicApiKey: "anthropic-key",
@@ -170,6 +174,13 @@ describe("bootstrap environment", () => {
     );
 
     expect(settings.DOOLITTLE_EMBEDDING_PROVIDER).toBe("elizacloud");
+    expect(settings.OLLAMA_API_ENDPOINT).toBe("http://localhost:11434/api");
+    expect(settings.OLLAMA_SMALL_MODEL).toBe("granite4.1:3b");
+    expect(settings.OLLAMA_MEDIUM_MODEL).toBe("granite4.1:3b");
+    expect(settings.OLLAMA_LARGE_MODEL).toBe("granite4.1:3b");
+    expect(settings.OLLAMA_RESPONSE_HANDLER_MODEL).toBe("granite4.1:3b");
+    expect(settings.OLLAMA_ACTION_PLANNER_MODEL).toBe("granite4.1:3b");
+    expect(settings.OLLAMA_EMBEDDING_MODEL).toBe("nomic-embed-text:latest");
     expect(settings.ELIZAOS_CLOUD_EMBEDDING_MODEL).toBe("embed-cloud");
     expect(settings.OPENAI_API_KEY).toBe("openai-key");
     expect(settings.ANTHROPIC_API_KEY).toBe("anthropic-key");
@@ -204,6 +215,10 @@ describe("bootstrap environment", () => {
         elizaCloudSmallModel: "small-cloud",
         elizaCloudLargeModel: "large-cloud",
         elizaCloudEmbeddingModel: "embed-cloud",
+        ollamaApiEndpoint: "http://localhost:11434/api",
+        ollamaSmallModel: "granite4.1:3b",
+        ollamaLargeModel: "granite4.1:3b",
+        ollamaEmbeddingModel: "nomic-embed-text:latest",
         openAiBaseUrl: "https://openai.example",
         anthropicSmallModel: "claude-small",
         anthropicLargeModel: "claude-large",
@@ -239,6 +254,56 @@ describe("bootstrap environment", () => {
     expect(settings.SECRET_SALT).toBe("injected-salt");
     expect(settings.PGLITE_DATA_DIR).toBe(join(root, "pglite-explicit"));
     expect(settings.NODE_ENV).toBe("production");
+
+    rmSync(root, { force: true, recursive: true });
+  });
+
+  it("does not expose a saved ElizaCloud key to local Devin runtime settings", () => {
+    const root = join(tmpdir(), `doolittle-bootstrap-${Date.now()}-devin`);
+    rmSync(root, { force: true, recursive: true });
+    mkdirSync(root, { recursive: true });
+
+    const settings = buildPluginSettings(
+      {
+        dataDir: root,
+        elizaCloudEnabled: false,
+        elizaCloudApiKey: "saved-cloud-key",
+        elizaCloudBaseUrl: "https://cloud.example",
+        elizaCloudSmallModel: "small-cloud",
+        elizaCloudLargeModel: "large-cloud",
+        elizaCloudEmbeddingModel: "embed-cloud",
+        ollamaApiEndpoint: "http://localhost:11434/api",
+        ollamaSmallModel: "granite4.1:3b",
+        ollamaLargeModel: "granite4.1:3b",
+        ollamaEmbeddingModel: "nomic-embed-text:latest",
+        openAiBaseUrl: "https://openai.example",
+        anthropicSmallModel: "claude-small",
+        anthropicLargeModel: "claude-large",
+        useLinkedDevinAuth: true,
+        devinCliCommand: "devin",
+        devinModel: "swe-1-6-fast",
+        devinTimeoutMs: 120_000,
+      } as EnvConfig,
+      {
+        nativeRegistry: {},
+      } as unknown as AppServices,
+      {
+        ...makeRuntimeSettings(),
+        model: {
+          model: "swe-1-6-fast",
+          provider: "devin",
+        },
+      } as ReturnType<AppServices["settings"]["get"]>,
+      {
+        env: {
+          DOOLITTLE_EMBEDDING_PROVIDER: "local",
+        },
+        secretSalt: "injected-salt",
+      },
+    );
+
+    expect(settings.ELIZAOS_CLOUD_ENABLED).toBe("false");
+    expect(settings.ELIZAOS_CLOUD_API_KEY).toBeUndefined();
 
     rmSync(root, { force: true, recursive: true });
   });

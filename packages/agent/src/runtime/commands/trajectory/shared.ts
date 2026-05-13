@@ -8,6 +8,11 @@ export type TrajectoryCommandOptions = {
   tags?: string[];
   notes?: string;
   rubric?: string[];
+  includeEvents?: boolean;
+  recordKind?: "message" | "event";
+  event?: string;
+  category?: string;
+  runId?: string;
 };
 
 export type TrajectoryBenchmarkCaseInput = {
@@ -43,6 +48,20 @@ export function parseTrajectoryArgs(raw: string): TrajectoryCommandOptions {
       if (!Number.isNaN(limit) && limit > 0) {
         options.limit = limit;
       }
+    } else if (token.startsWith("events:")) {
+      const value = token.replace("events:", "").trim();
+      options.includeEvents = value !== "false" && value !== "off";
+    } else if (token.startsWith("kind:")) {
+      const kind = token.replace("kind:", "").trim();
+      if (kind === "message" || kind === "event") {
+        options.recordKind = kind;
+      }
+    } else if (token.startsWith("event:")) {
+      options.event = token.replace("event:", "").trim();
+    } else if (token.startsWith("category:")) {
+      options.category = token.replace("category:", "").trim();
+    } else if (token.startsWith("run:")) {
+      options.runId = token.replace("run:", "").trim();
     } else if (token.startsWith("label:")) {
       options.label = token.replace("label:", "").trim();
     } else if (token.startsWith("purpose:")) {

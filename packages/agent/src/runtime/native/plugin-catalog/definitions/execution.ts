@@ -2,16 +2,6 @@ import type { NativePluginCatalogSeed } from "./types";
 
 export const EXECUTION_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
   {
-    id: "execution.shell",
-    packageName: "@elizaos/plugin-shell",
-    category: "execution",
-    source: "official",
-    kind: "adapter",
-    maturity: "production",
-    enablement: "always",
-    notes: "Official shell execution service on the alpha line.",
-  },
-  {
     id: "execution.e2b",
     packageName: "@elizaos/plugin-e2b",
     category: "execution",
@@ -36,35 +26,25 @@ export const EXECUTION_PLUGIN_CATALOG_SEEDS: NativePluginCatalogSeed[] = [
   },
   {
     id: "execution.coding-agent",
-    packageName: "@elizaos/plugin-coding-agent",
+    packageName: "@doolittle/plugin-coding-agent",
     category: "execution",
-    source: "vendored",
-    kind: "vendored",
-    maturity: "alpha",
-    enablement: "always",
-    notes:
-      "Vendored coding agent wrapper kept local for runtime-specific wiring.",
-  },
-  {
-    id: "execution.agent-orchestrator",
-    packageName: "@elizaos/plugin-agent-orchestrator",
-    category: "execution",
-    source: "vendored",
-    kind: "vendored",
-    maturity: "alpha",
-    enablement: "always",
-    notes:
-      "Vendored orchestration wrapper kept local for runtime-specific wiring.",
-  },
-  {
-    id: "execution.plugin-manager",
-    packageName: "@elizaos/plugin-plugin-manager",
-    category: "execution",
-    source: "official",
+    source: "custom",
     kind: "adapter",
     maturity: "alpha",
     enablement: "always",
-    notes: "Official plugin manager service on the alpha line.",
+    notes:
+      "Doolittle coding agent service bridging workspace, repository, shell, and delegation. Consolidated into doolittle-plugin.",
+  },
+  {
+    id: "execution.agent-orchestrator",
+    packageName: "@doolittle/plugin-agent-orchestrator",
+    category: "execution",
+    source: "custom",
+    kind: "adapter",
+    maturity: "alpha",
+    enablement: "always",
+    notes:
+      "Doolittle delegation orchestrator with supervision and queue management. Consolidated into doolittle-plugin.",
   },
   {
     id: "execution.planning",

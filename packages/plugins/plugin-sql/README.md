@@ -2,6 +2,6 @@
 
 Workspace-owned SQL plugin aligned to the Doolittle runtime line.
 
-This package wraps the published `@elizaos/plugin-sql@2.0.0-alpha.17` plugin and
-adapts its older adapter method signatures to the `@elizaos/core@2.0.0-alpha.85`
+This package wraps the published `@elizaos/plugin-sql@2.0.0-alpha.20` plugin and
+adapts its older adapter method signatures to the `@elizaos/core@2.0.0-alpha.537`
 runtime contract used by this repo.

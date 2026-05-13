@@ -1,3 +1,4 @@
+import { relative } from "node:path";
 import { ensureEnvFile, readEnvEntries } from "../core/env-file";
 import { applyBootstrapAnswers } from "../persistence/apply";
 import { buildBootstrapCheckSummary } from "../summary";
@@ -48,6 +49,13 @@ export async function runBootstrapProgram(
         createdDirs,
         dependencyProbes,
         envMessages: initialEnvMessages,
+        files: [
+          paths.envPath,
+          paths.settingsPath,
+          paths.gatewayPath,
+          paths.onboardingPath,
+          paths.nativeOnboardingPath,
+        ].map((path) => relative(root, path) || path),
       }),
     );
     return 0;

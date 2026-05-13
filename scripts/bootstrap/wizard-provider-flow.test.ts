@@ -17,6 +17,12 @@ describe("bootstrap provider flow helpers", () => {
           reusable: false,
           detail: "claude",
         },
+        devin: {
+          provider: "devin",
+          available: false,
+          reusable: false,
+          detail: "devin",
+        },
         elizaCloud: {
           provider: "elizacloud",
           available: false,
@@ -31,6 +37,7 @@ describe("bootstrap provider flow helpers", () => {
     expect(options.map((option) => option.value)).toEqual([
       "retry",
       "key",
+      "ollama",
       "offline",
     ]);
   });
@@ -50,6 +57,12 @@ describe("bootstrap provider flow helpers", () => {
           reusable: true,
           detail: "claude",
         },
+        devin: {
+          provider: "devin",
+          available: false,
+          reusable: false,
+          detail: "devin",
+        },
         elizaCloud: {
           provider: "elizacloud",
           available: false,
@@ -66,6 +79,7 @@ describe("bootstrap provider flow helpers", () => {
       "key",
       "codex",
       "claude-code",
+      "ollama",
       "openai",
       "anthropic",
       "offline",

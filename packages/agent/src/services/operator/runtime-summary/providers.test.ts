@@ -18,9 +18,17 @@ function createConfig(overrides: Partial<EnvConfig> = {}): EnvConfig {
     elizaCloudSmallModel: "anthropic/claude-haiku-4-5-20251001",
     elizaCloudLargeModel: "anthropic/claude-sonnet-4.6",
     elizaCloudEmbeddingModel: "openai/text-embedding-3-small",
+    ollamaApiEndpoint: "http://localhost:11434/api",
+    ollamaSmallModel: "granite4.1:3b",
+    ollamaLargeModel: "granite4.1:3b",
+    ollamaEmbeddingModel: "nomic-embed-text:latest",
     openAiApiKey: undefined,
     offlineBootstrapMode: false,
     useLinkedCodexAuth: false,
+    useLinkedDevinAuth: false,
+    devinCliCommand: "devin",
+    devinModel: "swe-1-6-fast",
+    devinTimeoutMs: 120000,
     openAiBaseUrl: "https://api.openai.com/v1",
     openAiModel: "gpt-5.4",
     openAiImageModel: "gpt-image-1",
@@ -137,6 +145,14 @@ function createLinkedAccounts(
       fallbackReady: false,
       detail: "No reusable Claude Code account is linked.",
     },
+    devin: {
+      provider: "devin",
+      available: false,
+      reusable: false,
+      nativeReady: false,
+      fallbackReady: false,
+      detail: "No reusable Devin account is linked.",
+    },
     elizaCloud: {
       provider: "elizacloud",
       available: false,
@@ -175,6 +191,12 @@ describe("buildProviderSummaries", () => {
 
     expect(rows).toEqual([
       {
+        id: "ollama",
+        ready: true,
+        detail:
+          "Local Ollama configured for granite4.1:3b with nomic-embed-text:latest embeddings.",
+      },
+      {
         id: "codex",
         ready: true,
         detail: "Linked Codex account is ready for Codex-native workflows.",
@@ -184,6 +206,11 @@ describe("buildProviderSummaries", () => {
         ready: true,
         detail:
           "Linked Claude Code account is ready for Claude-native workflows.",
+      },
+      {
+        id: "devin",
+        ready: false,
+        detail: "No reusable Devin CLI login is linked.",
       },
       {
         id: "openai",
@@ -222,6 +249,12 @@ describe("buildProviderSummaries", () => {
 
     expect(rows).toEqual([
       {
+        id: "ollama",
+        ready: true,
+        detail:
+          "Local Ollama configured for granite4.1:3b with nomic-embed-text:latest embeddings.",
+      },
+      {
         id: "codex",
         ready: true,
         detail: "Linked Codex account is ready for Codex-native workflows.",
@@ -231,6 +264,11 @@ describe("buildProviderSummaries", () => {
         ready: false,
         detail:
           "Claude Code local CLI fallback is available, but native Eliza auth is not fully bound yet.",
+      },
+      {
+        id: "devin",
+        ready: false,
+        detail: "No reusable Devin CLI login is linked.",
       },
       {
         id: "openai",

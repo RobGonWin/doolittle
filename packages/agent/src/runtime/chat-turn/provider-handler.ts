@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { type Content, EventType, type Memory, type UUID } from "@elizaos/core";
 import type { AgentExecutionContext } from "@/runtime/chat";
 import type { StreamingOutputModel } from "./provider-streaming";
+import { elapsedMsSince, recordTrajectoryEvent } from "./trajectory";
 
 export type ProviderTurnSettingsSnapshot = {
   model: {
@@ -29,6 +30,8 @@ export type ProviderMessageExecutionResult = {
 type ProviderMessageExecutionInput = {
   context: AgentExecutionContext;
   memory: Memory;
+  sessionId?: string;
+  runId?: string;
   streamState: StreamingOutputModel;
   derivedTurnPolicy: {
     useMultiStep: boolean;
@@ -53,12 +56,44 @@ type ProviderMessageExecutionInput = {
   isRecoverableNativePlanningError: (error: unknown) => boolean;
 };
 
+function memoryText(memory: Memory): string {
+  const content = memory.content as { text?: unknown } | undefined;
+  return typeof content?.text === "string" ? content.text : "";
+}
+
 export async function executeProviderMessageTurn(
   input: ProviderMessageExecutionInput,
 ): Promise<ProviderMessageExecutionResult> {
   let handledMessage = false;
   let response = input.streamState.getResponse();
   let runFailureMessage: string | undefined;
+  const startedAt = performance.now();
+  const prompt = memoryText(input.memory);
+  const sessionId = input.sessionId ?? String(input.memory.roomId);
+
+  recordTrajectoryEvent(input.context, {
+    category: "model",
+    event: "model.request",
+    sessionId,
+    runId: input.runId,
+    roomId: input.roomId,
+    source: input.connectionSource,
+    provider: input.settingsDuring.model.provider,
+    model: input.settingsDuring.model.model,
+    text: `[model:request] ${input.settingsDuring.model.provider}/${input.settingsDuring.model.model}`,
+    metadata: {
+      path: "provider-message-service",
+      prompt,
+      promptChars: prompt.length,
+      useMultiStep: input.derivedTurnPolicy.useMultiStep,
+      maxIterations: input.derivedTurnPolicy.useMultiStep
+        ? input.derivedTurnPolicy.maxIterations
+        : 1,
+      baseUrl: input.settingsDuring.model.baseUrl,
+      temperature: input.settingsDuring.model.temperature,
+      maxTokens: input.settingsDuring.model.maxTokens,
+    },
+  });
 
   try {
     const messageResult =
@@ -137,6 +172,26 @@ export async function executeProviderMessageTurn(
       runFailureMessage = failureMessage;
       input.streamState.setResponse(response);
     }
+  } finally {
+    recordTrajectoryEvent(input.context, {
+      category: "model",
+      event: runFailureMessage ? "model.error" : "model.response",
+      sessionId,
+      runId: input.runId,
+      roomId: input.roomId,
+      source: input.connectionSource,
+      provider: input.settingsDuring.model.provider,
+      model: input.settingsDuring.model.model,
+      elapsedMs: elapsedMsSince(startedAt),
+      text: `[model:${runFailureMessage ? "error" : "response"}] ${response}`,
+      metadata: {
+        path: "provider-message-service",
+        handledMessage,
+        response,
+        responseChars: response.length,
+        runFailureMessage,
+      },
+    });
   }
 
   return {

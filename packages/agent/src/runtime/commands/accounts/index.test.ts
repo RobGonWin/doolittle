@@ -97,7 +97,7 @@ describe("accounts command router", () => {
     );
 
     expect(response).toContain(
-      "/accounts refresh <elizacloud|codex|claude-code>",
+      "/accounts refresh <elizacloud|codex|claude-code|devin>",
     );
   });
 });

@@ -20,7 +20,7 @@ export async function handleAccountsProviderCommand(
     const provider = resolveProviderArgument(trimmed, "/accounts refresh ");
     if (!provider) {
       return invalidProviderUsage(
-        "/accounts refresh <elizacloud|codex|claude-code>",
+        "/accounts refresh <elizacloud|codex|claude-code|devin>",
       );
     }
     const snapshot = await refreshLinkedAccounts(provider);
@@ -35,7 +35,7 @@ export async function handleAccountsProviderCommand(
     const provider = resolveProviderArgument(trimmed, "/accounts use ");
     if (!provider) {
       return invalidProviderUsage(
-        "/accounts use <elizacloud|codex|claude-code>",
+        "/accounts use <elizacloud|codex|claude-code|devin>",
       );
     }
     return formatProviderActivation(provider, context);
@@ -45,7 +45,7 @@ export async function handleAccountsProviderCommand(
     const provider = resolveProviderArgument(trimmed, "/accounts connect ");
     if (!provider) {
       return invalidProviderUsage(
-        "/accounts connect <elizacloud|codex|claude-code>",
+        "/accounts connect <elizacloud|codex|claude-code|devin>",
       );
     }
     return formatProviderConnection(provider, context);
@@ -55,7 +55,7 @@ export async function handleAccountsProviderCommand(
     const provider = resolveProviderArgument(trimmed, "/accounts login ");
     if (!provider) {
       return invalidProviderUsage(
-        "/accounts login <elizacloud|codex|claude-code>",
+        "/accounts login <elizacloud|codex|claude-code|devin>",
       );
     }
     return handleAccountLogin(provider, hooks);

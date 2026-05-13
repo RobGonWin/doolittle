@@ -29,6 +29,10 @@ const HOTKEY_DEFINITIONS: Array<{
 
 const HELP_EXAMPLES = [
   "/commands",
+  "/retry",
+  "/undo",
+  "/todo list",
+  "/todo add Release polish :: verify the Doolittle-native operator loop",
   "/review",
   "/security-review",
   "/release-check",

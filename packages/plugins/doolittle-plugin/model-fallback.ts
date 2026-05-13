@@ -7,6 +7,7 @@ export function hasConfiguredModelProvider(config: EnvConfig): boolean {
     config.openAiApiKey ||
       config.anthropicApiKey ||
       (config.elizaCloudEnabled && config.elizaCloudApiKey) ||
+      config.ollamaApiEndpoint ||
       config.useLinkedCodexAuth ||
       config.useLinkedClaudeCodeAuth,
   );

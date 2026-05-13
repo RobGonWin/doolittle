@@ -15,10 +15,14 @@ export interface TrajectoryBundleEntry {
     sessionId?: string | null;
     role?: TrajectoryRole | null;
   };
+  recordCount?: number;
   messageCount: number;
+  messageRecordCount?: number;
+  eventCount?: number;
   sessionCount: number;
   sessions: string[];
   roleCounts: Record<string, number>;
+  recordKindCounts?: Record<string, number>;
 }
 
 export interface TrajectoryReplayResult extends TrajectoryBundleEntry {

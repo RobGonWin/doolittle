@@ -11,6 +11,9 @@ function resolveAutonomousPrimaryModel(config: EnvConfig): string | undefined {
   if (config.useLinkedCodexAuth) {
     return config.openAiModel;
   }
+  if (config.useLinkedDevinAuth) {
+    return config.devinModel;
+  }
   if (config.useLinkedClaudeCodeAuth || config.claudeCodeCliFallback) {
     return config.anthropicLargeModel;
   }
@@ -57,7 +60,7 @@ export function createAutonomousCompatConfig(
     },
   };
 
-  if (config.elizaCloudEnabled || config.elizaCloudApiKey) {
+  if (config.elizaCloudEnabled) {
     compatConfig.cloud = {
       enabled: config.elizaCloudEnabled,
       provider: "elizacloud",
@@ -80,6 +83,14 @@ export function createAutonomousCompatConfig(
       compatConfig as never,
       "openai-subscription",
     );
+  } else if (config.useLinkedDevinAuth) {
+    compatConfig.agents = {
+      defaults: {
+        model: {
+          primary: config.devinModel,
+        },
+      },
+    };
   } else if (config.useLinkedClaudeCodeAuth || config.claudeCodeCliFallback) {
     applySubscriptionProviderConfig(
       compatConfig as never,

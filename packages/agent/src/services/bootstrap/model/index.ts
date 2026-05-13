@@ -5,8 +5,10 @@ export type DefaultServiceModelProvider =
   | "anthropic"
   | "openai"
   | "elizacloud"
+  | "ollama"
   | "codex"
   | "claude-code"
+  | "devin"
   | "offline";
 
 export interface DefaultServiceModelConfig {
@@ -18,7 +20,7 @@ export interface DefaultServiceModelConfig {
 }
 
 export interface ServiceModelContext {
-  provider: "openai" | "anthropic" | "offline";
+  provider: "openai" | "anthropic" | "ollama" | "offline";
   model: string;
   baseUrl: string;
   temperature: number;
@@ -37,29 +39,41 @@ export function resolveDefaultServiceModel(
   const stableElizaCloudLargeModel = "xai/grok-4.1-fast-reasoning";
   const provider: DefaultServiceModelProvider = config.elizaCloudEnabled
     ? "elizacloud"
-    : config.anthropicApiKey
-      ? "anthropic"
-      : config.openAiApiKey
-        ? "openai"
-        : config.useLinkedClaudeCodeAuth
-          ? "claude-code"
-          : config.useLinkedCodexAuth
-            ? "codex"
-            : "offline";
+    : config.useLinkedDevinAuth
+      ? "devin"
+      : config.ollamaApiEndpoint?.trim()
+        ? "ollama"
+        : config.anthropicApiKey
+          ? "anthropic"
+          : config.openAiApiKey
+            ? "openai"
+            : config.useLinkedClaudeCodeAuth
+              ? "claude-code"
+              : config.useLinkedCodexAuth
+                ? "codex"
+                : "offline";
   const defaultModel =
     provider === "elizacloud"
       ? config.elizaCloudLargeModel
-      : provider === "anthropic" || provider === "claude-code"
-        ? config.anthropicLargeModel
-        : config.openAiModel;
+      : provider === "devin"
+        ? config.devinModel
+        : provider === "ollama"
+          ? config.ollamaLargeModel
+          : provider === "anthropic" || provider === "claude-code"
+            ? config.anthropicLargeModel
+            : config.openAiModel;
   const defaultBaseUrl =
     provider === "elizacloud"
       ? config.elizaCloudBaseUrl
-      : provider === "anthropic" || provider === "claude-code"
-        ? (config.anthropicBaseUrl ?? "https://api.anthropic.com")
-        : provider === "codex"
-          ? "https://chatgpt.com/backend-api/codex"
-          : config.openAiBaseUrl;
+      : provider === "devin"
+        ? ""
+        : provider === "ollama"
+          ? config.ollamaApiEndpoint
+          : provider === "anthropic" || provider === "claude-code"
+            ? (config.anthropicBaseUrl ?? "https://api.anthropic.com")
+            : provider === "codex"
+              ? "https://chatgpt.com/backend-api/codex"
+              : config.openAiBaseUrl;
 
   return {
     stableElizaCloudSmallModel,
@@ -79,12 +93,17 @@ export function createServiceModelContextResolver(
       settings.get().model.provider === "codex" ||
       settings.get().model.provider === "elizacloud"
         ? "openai"
-        : settings.get().model.provider === "claude-code"
-          ? "anthropic"
-          : (settings.get().model.provider as
-              | "openai"
-              | "anthropic"
-              | "offline"),
+        : settings.get().model.provider === "ollama"
+          ? "ollama"
+          : settings.get().model.provider === "claude-code"
+            ? "anthropic"
+            : settings.get().model.provider === "devin"
+              ? "offline"
+              : (settings.get().model.provider as
+                  | "openai"
+                  | "anthropic"
+                  | "ollama"
+                  | "offline"),
     model: settings.get().model.model,
     baseUrl: settings.get().model.baseUrl,
     temperature: settings.get().model.temperature,

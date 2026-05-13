@@ -1,6 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import { DEFAULT_TUI_THEME } from "../../packages/agent/src/runtime/theme-catalog";
-import { finalizeWizardAnswers, summarizeAnswers } from "./answers";
+import {
+  createHeadlessAnswers,
+  finalizeWizardAnswers,
+  summarizeAnswers,
+} from "./answers";
 import {
   DEFAULT_ELIZA_CLOUD_EMBEDDING_MODEL,
   DEFAULT_ELIZA_CLOUD_LARGE_MODEL,
@@ -43,6 +47,10 @@ const baseAnswers: WizardAnswers = {
   elizaCloudSmallModel: "xai/grok-4.1-fast-non-reasoning",
   elizaCloudModel: "xai/grok-4.1-fast-reasoning",
   elizaCloudEmbeddingModel: "openai/text-embedding-3-small",
+  ollamaApiEndpoint: "http://localhost:11434/api",
+  ollamaSmallModel: "granite4.1:3b",
+  ollamaLargeModel: "granite4.1:3b",
+  ollamaEmbeddingModel: "nomic-embed-text:latest",
   anthropicApiKey: "",
   useLinkedClaudeCodeAuth: false,
   claudeCodeCliFallback: false,
@@ -91,6 +99,16 @@ describe("bootstrap answer helpers", () => {
       "mind=elizacloud model=xai/grok-4.1-fast-reasoning embed=openai/text-embedding-3-small",
     );
     expect(lines).toContain("tools=mcp, acp, codegen");
+  });
+
+  it("defaults headless bootstrap to local Ollama inference", () => {
+    const answers = createHeadlessAnswers(new Map());
+
+    expect(answers.provider).toBe("ollama");
+    expect(answers.ollamaApiEndpoint).toBe("http://localhost:11434/api");
+    expect(summarizeAnswers(answers)).toContain(
+      "mind=ollama model=granite4.1:3b embed=nomic-embed-text:latest endpoint=http://localhost:11434/api",
+    );
   });
 
   it("switches openai to linked Claude Code when the linked account is ready", () => {

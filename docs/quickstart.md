@@ -10,6 +10,17 @@ bash scripts/install.sh
 
 This performs dependency install, creates missing defaults, and launches the onboarding flow.
 
+The default mind is local Ollama through the official ElizaOS Ollama plugin. For a live first prompt, make sure Ollama is running, then pull the default models:
+
+```bash
+ollama pull granite4.1:3b
+ollama pull nomic-embed-text:latest
+```
+
+If Ollama is not already running as an app or service, start `ollama serve` in another terminal before the first live prompt.
+
+The bootstrap writes `OLLAMA_API_ENDPOINT`, `OLLAMA_SMALL_MODEL`, `OLLAMA_LARGE_MODEL`, and `OLLAMA_EMBEDDING_MODEL` into `.env`. You can still choose Eliza Cloud, Codex, Claude Code, OpenAI, or Anthropic in `doolittle setup`, but the no-key path is local-first now.
+
 If you need a non-interactive pass, use:
 
 ```bash
@@ -18,6 +29,11 @@ bash scripts/install.sh --skip-wizard
 bash scripts/install.sh --check
 bash scripts/install.sh --yes
 ```
+
+`--check` is the dry-run receipt. It reports the directories and files that setup
+would touch, including `.env`, `.doolittle/settings.json`,
+`.doolittle/gateway/gateway.json`, `.doolittle/onboarding.json`, and
+`.doolittle/onboarding.state.json`.
 
 If install reports PATH changes, open a new terminal before first run.
 
@@ -129,3 +145,4 @@ Before documenting capability, route through:
 
 - [`docs/plugin-inventory.md`](./plugin-inventory.md) (what is assembled)
 - [`docs/capability-truth.md`](./capability-truth.md) (what each runtime slice can and cannot claim)
+- [`docs/operator-wow-contract.md`](./operator-wow-contract.md) (what native operator product outcomes must prove)

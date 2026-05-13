@@ -2,14 +2,24 @@ import type { WizardAnswers } from "../types";
 
 export function summarizeAnswers(answers: WizardAnswers): string[] {
   const model =
-    answers.provider === "anthropic" || answers.provider === "claude-code"
-      ? answers.anthropicModel
-      : answers.provider === "elizacloud"
-        ? answers.elizaCloudModel
-        : answers.openaiModel;
+    answers.provider === "devin"
+      ? answers.devinModel
+      : answers.provider === "anthropic" || answers.provider === "claude-code"
+        ? answers.anthropicModel
+        : answers.provider === "ollama"
+          ? answers.ollamaLargeModel
+          : answers.provider === "elizacloud"
+            ? answers.elizaCloudModel
+            : answers.openaiModel;
+  const embeddingDetail =
+    answers.provider === "elizacloud"
+      ? ` embed=${answers.elizaCloudEmbeddingModel}`
+      : answers.provider === "ollama"
+        ? ` embed=${answers.ollamaEmbeddingModel} endpoint=${answers.ollamaApiEndpoint}`
+        : "";
   return [
-    `mind=${answers.provider} model=${model}${answers.provider === "elizacloud" ? ` embed=${answers.elizaCloudEmbeddingModel}` : ""}`,
-    `threads=cloud:${answers.elizaCloudApiKey ? "bound" : "idle"} codex:${answers.useLinkedCodexAuth ? "bound" : "idle"} claude:${answers.useLinkedClaudeCodeAuth ? "bound" : "idle"}`,
+    `mind=${answers.provider} model=${model}${embeddingDetail}`,
+    `threads=cloud:${answers.elizaCloudApiKey ? "bound" : "idle"} devin:${answers.useLinkedDevinAuth ? "bound" : "idle"} codex:${answers.useLinkedCodexAuth ? "bound" : "idle"} claude:${answers.useLinkedClaudeCodeAuth ? "bound" : "idle"}`,
     `run=${answers.runDepth} cap=${answers.maxIterations} progress=${answers.toolProgressMode}`,
     `body=${answers.backend} eyes=${answers.browser}`,
     `channels=${answers.transports.length ? answers.transports.join(", ") : "api, cli only"}`,

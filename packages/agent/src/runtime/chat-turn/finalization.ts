@@ -1,6 +1,7 @@
 import type { AgentExecutionContext, AgentTurnHooks } from "@/runtime/chat";
 import type { TurnState } from "./state";
 import { storeSessionMessage } from "./state";
+import { recordTrajectoryEvent } from "./trajectory";
 
 const SKILL_SYNTHESIS_NUDGE_INTERVAL = 12;
 
@@ -23,6 +24,23 @@ export async function finalizeTurnResponse(
     entityId: turn.entityId,
     role: "assistant",
     text,
+  });
+  const modelSettings = turn.settings?.model ?? {};
+  recordTrajectoryEvent(context, {
+    category: "turn",
+    event: "turn.completed",
+    sessionId: turn.sessionId,
+    runId: turn.runId,
+    roomId: String(turn.roomId),
+    source: turn.connectionSource,
+    provider: modelSettings.provider ?? "unknown",
+    model: modelSettings.model ?? "unknown",
+    text: `[turn:completed] ${text}`,
+    metadata: {
+      phase,
+      response: text,
+      responseChars: text.length,
+    },
   });
   context.services.runController.finishTurn(turn.sessionId, "complete");
   scheduleProfileObservation();

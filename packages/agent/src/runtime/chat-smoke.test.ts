@@ -192,4 +192,90 @@ describe("chat turn orchestration", () => {
     expect(runSlashCommandTurn).toHaveBeenCalledTimes(1);
     expect(runPostCommandTurn).toHaveBeenCalledTimes(1);
   });
+
+  it("retries the latest conversational turn without routing through slash command storage", async () => {
+    const runSlashCommandTurn = mock(async () => "slash-result");
+    let retryInput: ChatTurnRequest | undefined;
+    const runPostCommandTurn = mock(
+      async (_input: ChatTurnRequest, nextInput: ChatTurnRequest) => {
+        retryInput = nextInput;
+        return "retried-result";
+      },
+    );
+    const deleteLatestExchange = mock(() => ({
+      sessionId: "room:alice",
+      userMessage: {
+        id: "msg-1",
+        sessionId: "room:alice",
+        roomId: "room:alice",
+        entityId: "alice",
+        role: "user",
+        text: "ship the operator loop",
+        createdAt: "2026-05-13T00:00:00.000Z",
+      },
+      assistantMessages: [],
+      deletedMessages: 2,
+    }));
+
+    mock.module("@/runtime/chat-turn/command", () => ({ runSlashCommandTurn }));
+    mock.module("@/runtime/chat-turn/post-command", () => ({
+      runPostCommandTurn,
+    }));
+    mockWorkflowCommands();
+
+    const { handleAgentTurn } = await loadHandleAgentTurn();
+    const response = await handleAgentTurn(
+      createInput("/retry"),
+      createContext({
+        services: {
+          ...createContext().services,
+          sessions: {
+            deleteLatestExchange,
+          },
+        },
+      } as unknown as Partial<AgentExecutionContext>),
+    );
+
+    expect(response).toBe("retried-result");
+    expect(deleteLatestExchange).toHaveBeenCalledWith("room:alice", {
+      skipSlashCommands: true,
+    });
+    expect(runSlashCommandTurn).not.toHaveBeenCalled();
+    expect(runPostCommandTurn).toHaveBeenCalledTimes(1);
+    expect(retryInput?.message).toBe("ship the operator loop");
+  });
+
+  it("returns a truthful retry message when no prior conversational turn exists", async () => {
+    const runSlashCommandTurn = mock(async () => "slash-result");
+    const runPostCommandTurn = mock(async () => "post-result");
+
+    mock.module("@/runtime/chat-turn/command", () => ({ runSlashCommandTurn }));
+    mock.module("@/runtime/chat-turn/post-command", () => ({
+      runPostCommandTurn,
+    }));
+    mockWorkflowCommands();
+
+    const { handleAgentTurn } = await loadHandleAgentTurn();
+    const response = await handleAgentTurn(
+      createInput("/retry"),
+      createContext({
+        services: {
+          ...createContext().services,
+          sessions: {
+            deleteLatestExchange: () => ({
+              sessionId: "room:alice",
+              assistantMessages: [],
+              deletedMessages: 0,
+            }),
+          },
+        },
+      } as unknown as Partial<AgentExecutionContext>),
+    );
+
+    expect(response).toBe(
+      "No prior conversational turn is available to retry.",
+    );
+    expect(runSlashCommandTurn).not.toHaveBeenCalled();
+    expect(runPostCommandTurn).not.toHaveBeenCalled();
+  });
 });

@@ -98,7 +98,7 @@ describe("shell chrome", () => {
 
     expect(content).toContain("conversation shell");
     expect(content).toContain(
-      "startup   warming · deferred ready · diagnostics:warming",
+      "startup   warming · background ready · diagnostics:warming",
     );
     expect(content).toContain("channels  live 1 · ready 1 · configured 2");
     expect(content).toContain(

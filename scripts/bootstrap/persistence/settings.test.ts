@@ -31,6 +31,10 @@ const answers: WizardAnswers = {
   elizaCloudSmallModel: "small",
   elizaCloudModel: "large",
   elizaCloudEmbeddingModel: "embedding",
+  ollamaApiEndpoint: "http://localhost:11434/api",
+  ollamaSmallModel: "granite4.1:3b",
+  ollamaLargeModel: "granite4.1:3b",
+  ollamaEmbeddingModel: "nomic-embed-text:latest",
   anthropicApiKey: "anthropic-key",
   useLinkedClaudeCodeAuth: true,
   claudeCodeCliFallback: false,
@@ -142,5 +146,18 @@ describe("bootstrap persistence settings", () => {
     expect(next.model.baseUrl).toBe("");
     expect(next.gateway.sessionTimeoutMinutes).toBe(55);
     expect(next.gateway.mirrorResponsesToHistory).toBe(false);
+  });
+
+  it("projects Ollama answers into local runtime model settings", () => {
+    const next = buildBootstrapSettings(settings, {
+      ...answers,
+      provider: "ollama",
+      ollamaApiEndpoint: "http://127.0.0.1:11434/api",
+      ollamaLargeModel: "llama3.3:70b",
+    });
+
+    expect(next.model.provider).toBe("ollama");
+    expect(next.model.model).toBe("llama3.3:70b");
+    expect(next.model.baseUrl).toBe("http://127.0.0.1:11434/api");
   });
 });

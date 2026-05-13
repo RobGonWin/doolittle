@@ -6,10 +6,7 @@ import type {
   TurnExecutionPolicy,
 } from "@/runtime/turn-classification/types";
 import type { ChatTurnRequest } from "@/types/runtime";
-import {
-  buildInformationalResponseCacheKey,
-  shouldUseInformationalResponseCache,
-} from "./cache";
+import { buildDoolittleExperiencePrelude } from "./experience-prelude";
 import { buildCapabilityPrelude, buildCodingContextPrelude } from "./prelude";
 import {
   buildSystemFactsContext,
@@ -23,7 +20,6 @@ export interface PreferredLocalIntentModelInput {
 }
 
 export interface ModelInputAssembly {
-  responseCacheKey?: string;
   capabilityProfile: TurnCapabilityProfile;
   requiresPreferredLocalIntentSynthesis: boolean;
   build(localSynthesisPrelude?: string): {
@@ -55,22 +51,6 @@ export function createModelInputAssembly(input: {
   options?: { personalityId?: string };
   preferredLocalIntent?: PreferredLocalIntentModelInput | null;
 }): ModelInputAssembly {
-  const personalityBefore = input.context.services.personalities.getActive();
-  const shouldUseResponseCache = shouldUseInformationalResponseCache({
-    localInteractive: input.turn.localInteractive,
-    classification: input.turnClassification,
-    policy: input.derivedTurnPolicy,
-  });
-  const responseCacheKey = shouldUseResponseCache
-    ? buildInformationalResponseCacheKey({
-        sessionId: input.turn.sessionId,
-        provider: input.settingsDuring.model.provider,
-        model: input.settingsDuring.model.model,
-        personalityId: input.options?.personalityId ?? personalityBefore.id,
-        message: input.effectiveInput.message,
-      })
-    : undefined;
-
   const systemFactsPrelude = shouldAttachSystemFacts(
     input.effectiveInput.message,
   )
@@ -85,6 +65,12 @@ export function createModelInputAssembly(input: {
   const capabilityPrelude = buildCapabilityPrelude({
     context: input.context,
     profile: capabilityProfile,
+  });
+  const experiencePrelude = buildDoolittleExperiencePrelude({
+    context: input.context,
+    turn: input.turn,
+    userId: input.effectiveInput.userId,
+    message: input.effectiveInput.message,
   });
   const codingPrelude =
     input.turn.localInteractive &&
@@ -103,11 +89,11 @@ export function createModelInputAssembly(input: {
     requiresPreferredLocalIntentSynthesis(input.preferredLocalIntent);
 
   return {
-    responseCacheKey,
     capabilityProfile,
     requiresPreferredLocalIntentSynthesis: preferredLocalIntentNeedsSynthesis,
     build(localSynthesisPrelude) {
       const messagePrelude = [
+        experiencePrelude,
         systemFactsPrelude,
         capabilityPrelude,
         codingPrelude,

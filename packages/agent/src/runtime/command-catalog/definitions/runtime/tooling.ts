@@ -33,10 +33,19 @@ export const RuntimeToolingCommandCatalogEntries = [
     "List native execution plans and their linked task/workflow state.",
   ),
   runtimeCommand(
+    "/todo list",
+    "List the active native planning items through the Doolittle-native todo alias.",
+  ),
+  runtimeCommand(
     "/plans create <title> :: <objective> [:: <json-metadata>]",
     "Create a native execution plan with optional metadata.",
   ),
+  runtimeCommand(
+    "/todo add <title> :: <objective>",
+    "Create a native planning item without leaving the chat loop.",
+  ),
   runtimeCommand("/plans show <plan-id>", "Inspect one native execution plan."),
+  runtimeCommand("/todo show <plan-id>", "Inspect one native planning item."),
   runtimeCommand(
     "/runtime e2b",
     "Show native E2B sandbox ownership, active sandboxes, and execution readiness.",

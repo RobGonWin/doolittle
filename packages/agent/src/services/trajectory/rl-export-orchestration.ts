@@ -39,6 +39,7 @@ export function exportTrajectoryServiceRlReady(
   const messages = collectTrajectoryRecords(host, {
     sessionId,
     limit: 500,
+    includeEvents: false,
   });
   return exportTrajectoryRlReady({
     baseDir: host.baseDir,
@@ -63,6 +64,7 @@ export function exportTrajectoryServiceRlDataset(
 } {
   const messages = collectTrajectoryRecords(host, {
     limit: options.limit ?? 1000,
+    includeEvents: false,
   });
   return exportTrajectoryRlDataset({
     baseDir: host.baseDir,

@@ -25,12 +25,8 @@ export interface NativePluginAssembly {
   providers: Plugin[];
   messaging: Plugin[];
   knowledge: Plugin[];
-  browser: Plugin[];
-  media: Plugin[];
   research: Plugin[];
   execution: Plugin[];
-  integration: Plugin[];
-  automation: Plugin[];
   product: Plugin[];
   initial: Plugin[];
   deferred: Plugin[];
@@ -51,12 +47,7 @@ export async function buildNativePluginAssembly(
   const foundation: Plugin[] = [];
   const providers = await loadProviderPlugins(services, config);
   const identity = await loadHotIdentityPlugins(services);
-  const execution = await loadHotExecutionPlugins(
-    services,
-    config,
-    catalog,
-    groupedCatalog,
-  );
+  const execution = await loadHotExecutionPlugins(services, config);
   const product: Plugin[] = [createDoolittlePlugin({ services, config })];
   const initial = [
     ...foundation,
@@ -76,12 +67,8 @@ export async function buildNativePluginAssembly(
       providers,
       messaging: emptyDeferred.messaging,
       knowledge: identity,
-      browser: emptyDeferred.browser,
-      media: emptyDeferred.media,
       research: emptyDeferred.research,
       execution,
-      integration: emptyDeferred.integration,
-      automation: emptyDeferred.automation,
       product,
       initial,
       deferred: [],
@@ -92,13 +79,8 @@ export async function buildNativePluginAssembly(
   const deferredGroups = await loadDeferredPluginGroups(services, config);
   const deferred = [
     ...deferredGroups.messaging,
-    ...deferredGroups.knowledge,
-    ...deferredGroups.browser,
-    ...deferredGroups.media,
     ...deferredGroups.research,
     ...deferredGroups.execution,
-    ...deferredGroups.integration,
-    ...deferredGroups.automation,
   ];
 
   return {
@@ -106,14 +88,10 @@ export async function buildNativePluginAssembly(
     groupedCatalog,
     foundation,
     providers,
-    knowledge: [...identity, ...deferredGroups.knowledge],
+    knowledge: identity,
     messaging: deferredGroups.messaging,
-    browser: deferredGroups.browser,
-    media: deferredGroups.media,
     research: deferredGroups.research,
     execution: [...execution, ...deferredGroups.execution],
-    integration: deferredGroups.integration,
-    automation: deferredGroups.automation,
     product,
     initial,
     deferred,

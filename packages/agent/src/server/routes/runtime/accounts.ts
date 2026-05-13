@@ -45,7 +45,8 @@ export async function handleRuntimeAccountRoutes(
     if (!provider) {
       return json(
         {
-          error: "provider must be elizacloud, codex, claude-code, or all",
+          error:
+            "provider must be elizacloud, codex, claude-code, devin, or all",
         },
         400,
       );
@@ -69,7 +70,7 @@ export async function handleRuntimeAccountRoutes(
     const provider = readLinkedProvider(body.provider);
     if (!provider) {
       return json(
-        { error: "provider must be elizacloud, codex, or claude-code" },
+        { error: "provider must be elizacloud, codex, claude-code, or devin" },
         400,
       );
     }
@@ -83,7 +84,7 @@ export async function handleRuntimeAccountRoutes(
     const provider = readLinkedProvider(body.provider);
     if (!provider) {
       return json(
-        { error: "provider must be elizacloud, codex, or claude-code" },
+        { error: "provider must be elizacloud, codex, claude-code, or devin" },
         400,
       );
     }
@@ -106,7 +107,7 @@ export async function handleRuntimeAccountRoutes(
     const provider = readLinkedProvider(body.provider);
     if (!provider) {
       return json(
-        { error: "provider must be elizacloud, codex, or claude-code" },
+        { error: "provider must be elizacloud, codex, claude-code, or devin" },
         400,
       );
     }

@@ -3,8 +3,10 @@ import type { LinkedProviderAccountsSnapshot } from "@/runtime/native/account-au
 export type CloudRecoveryChoice =
   | "retry"
   | "key"
+  | "devin"
   | "codex"
   | "claude-code"
+  | "ollama"
   | "openai"
   | "anthropic"
   | "offline";
@@ -33,6 +35,14 @@ export function buildCloudRecoveryOptions(
     },
   ];
 
+  if (linkedAccounts.devin?.nativeReady || linkedAccounts.devin?.reusable) {
+    options.push({
+      value: "devin",
+      label: "Switch to Devin",
+      detail:
+        "Use the local Devin SWE model path for now instead of managed Cloud.",
+    });
+  }
   if (linkedAccounts.codex.nativeReady || linkedAccounts.codex.reusable) {
     options.push({
       value: "codex",
@@ -52,6 +62,12 @@ export function buildCloudRecoveryOptions(
         "Use the local Claude Code specialist path for now instead of managed Cloud.",
     });
   }
+  options.push({
+    value: "ollama",
+    label: "Switch to local Ollama",
+    detail:
+      "Use the local/self-hosted Ollama inference path instead of managed Cloud.",
+  });
   if (openaiApiKey.trim()) {
     options.push({
       value: "openai",

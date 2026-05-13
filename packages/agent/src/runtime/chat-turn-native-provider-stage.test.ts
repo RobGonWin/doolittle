@@ -64,14 +64,14 @@ function createPerf() {
 }
 
 describe("chat turn native provider stage", () => {
-  it("returns cached informational replies before provider execution", async () => {
+  it("routes informational turns through provider execution instead of cache", async () => {
     const runProviderModelTurn = mock(async () => ({
-      handledMessage: false,
-      response: "should not run",
+      handledMessage: true,
+      response: "fresh model reply",
     }));
     const runPostProviderTurn = mock(async () => ({
       kind: "final" as const,
-      response: "should not run",
+      response: "fresh model reply",
       observedActionCount: 0,
       usedFallback: false,
     }));
@@ -112,7 +112,6 @@ describe("chat turn native provider stage", () => {
       },
       {
         createModelInputAssembly: () => ({
-          responseCacheKey: "cache-key",
           capabilityProfile: "full",
           requiresPreferredLocalIntentSynthesis: false,
           build: () => ({
@@ -120,8 +119,6 @@ describe("chat turn native provider stage", () => {
             effectiveMessage: "expanded request",
           }),
         }),
-        readInformationalResponseCache: () => "cached reply",
-        handleCachedInformationalTurn: async () => "cached reply",
         buildPreferredLocalIntentSynthesisPrelude: async () => ({
           kind: "continue",
           localSynthesisPrelude: "",
@@ -133,9 +130,9 @@ describe("chat turn native provider stage", () => {
       },
     );
 
-    expect(result).toBe("cached reply");
-    expect(runProviderModelTurn).not.toHaveBeenCalled();
-    expect(runPostProviderTurn).not.toHaveBeenCalled();
+    expect(result).toBe("fresh model reply");
+    expect(runProviderModelTurn).toHaveBeenCalledTimes(1);
+    expect(runPostProviderTurn).toHaveBeenCalledTimes(1);
   });
 
   it("marks and flushes perf metadata after a finalized provider response", async () => {
@@ -187,8 +184,6 @@ describe("chat turn native provider stage", () => {
             effectiveMessage: "expanded request",
           }),
         }),
-        readInformationalResponseCache: () => undefined,
-        handleCachedInformationalTurn: async () => undefined,
         buildPreferredLocalIntentSynthesisPrelude: async () => ({
           kind: "continue",
           localSynthesisPrelude: "",

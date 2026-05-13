@@ -54,10 +54,27 @@ function summarizeLocalProviderConnection(
   };
 }
 
+function summarizeDoolittleLocalConnection(
+  config: EnvConfig,
+): AutonomousConnectionSummary | undefined {
+  if (config.elizaCloudEnabled) {
+    return undefined;
+  }
+
+  if (config.useLinkedDevinAuth) {
+    return summarizeLocalProviderConnection("devin", config.devinModel);
+  }
+
+  if (config.ollamaApiEndpoint?.trim()) {
+    return summarizeLocalProviderConnection("ollama", config.ollamaLargeModel);
+  }
+
+  return undefined;
+}
+
 export function summarizeAutonomousConnection(
   config?: EnvConfig,
 ): AutonomousConnectionSummary {
-  const snapshot = buildAutonomousCompatSnapshot(config);
   if (!config) {
     return {
       source: "provider-switch-config",
@@ -69,6 +86,12 @@ export function summarizeAutonomousConnection(
     };
   }
 
+  const localConnection = summarizeDoolittleLocalConnection(config);
+  if (localConnection) {
+    return localConnection;
+  }
+
+  const snapshot = buildAutonomousCompatSnapshot(config);
   const connection = snapshot?.connection;
   if (!connection) {
     return {

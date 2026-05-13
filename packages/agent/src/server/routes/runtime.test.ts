@@ -122,7 +122,7 @@ describe("handleRuntimeRoutes", () => {
 
     expect(response?.status).toBe(400);
     await expect(response?.json()).resolves.toEqual({
-      error: "provider must be elizacloud, codex, or claude-code",
+      error: "provider must be elizacloud, codex, claude-code, or devin",
     });
   });
 

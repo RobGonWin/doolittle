@@ -7,6 +7,7 @@ import type {
   RunDepth,
   ToolProgressMode,
 } from "@/types/runtime";
+import { recordTrajectoryEvent } from "./trajectory";
 
 export interface TurnState {
   agentName: string;
@@ -147,12 +148,44 @@ export function startTrackedTurn(
     toolProgressMode: ToolProgressMode;
   },
 ): void {
+  const modelSettings = turn.settings?.model ?? {};
   storeSessionMessage(context, {
     sessionId: turn.sessionId,
     roomId: turn.roomId,
     entityId: turn.entityId,
     role: "user",
     text: input.message,
+  });
+  recordTrajectoryEvent(context, {
+    category: "turn",
+    event: "turn.started",
+    sessionId: turn.sessionId,
+    runId: turn.runId,
+    roomId: String(turn.roomId),
+    source: input.source ?? "cli",
+    text: `[turn:started] ${input.message}`,
+    provider: modelSettings.provider ?? "unknown",
+    model: modelSettings.model ?? "unknown",
+    metadata: {
+      userId: input.userId,
+      message: input.message,
+      localInteractive: turn.localInteractive,
+      connectionSource: turn.connectionSource,
+      runDepth: effectiveAgentPolicy?.runDepth ?? turn.settings.agent.runDepth,
+      configuredMaxIterations:
+        effectiveAgentPolicy?.maxIterations ??
+        turn.settings.agent.maxIterations,
+      progressMode:
+        effectiveAgentPolicy?.toolProgressMode ??
+        turn.settings.agent.toolProgressMode,
+      settings: {
+        provider: modelSettings.provider ?? "unknown",
+        model: modelSettings.model ?? "unknown",
+        baseUrl: modelSettings.baseUrl ?? "",
+        temperature: modelSettings.temperature ?? 0,
+        maxTokens: modelSettings.maxTokens ?? 0,
+      },
+    },
   });
   context.services.runController.startTurn({
     sessionId: turn.sessionId,

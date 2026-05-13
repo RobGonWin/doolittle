@@ -22,15 +22,12 @@ const FOUNDATION_PACKAGES = [
   "@elizaos/agent",
   "@elizaos/autonomous",
   "@elizaos/skills",
-  "@elizaos/plugin-browser",
-  "@elizaos/plugin-mcp",
 ] as const;
 
 const ECOSYSTEM_PACKAGES = [
-  "@elizaos/plugin-action-bench",
-  "@elizaos/plugin-autocoder",
+  "@doolittle/plugin-action-bench",
+  "@doolittle/plugin-autocoder",
   "@elizaos/plugin-planning",
-  "@elizaos/plugin-tts",
 ] as const;
 
 export async function getAgentSdkAudit() {
@@ -53,12 +50,7 @@ export async function getAgentSdkAudit() {
     ),
   );
   const compatibilityTargets = [
-    ...new Set([
-      ...AI_PROVIDER_PLUGINS,
-      "@elizaos/plugin-browser",
-      "@elizaos/plugin-mcp",
-      ...ecosystemPackages,
-    ]),
+    ...new Set([...AI_PROVIDER_PLUGINS, ...ecosystemPackages]),
   ];
 
   const compatibility = await Promise.all(

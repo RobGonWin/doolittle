@@ -1,16 +1,12 @@
 import type { AgentExecutionContext, AgentTurnHooks } from "@/runtime/chat";
 import { getProviderReadinessMessage } from "@/runtime/linked-provider-accounts";
 import type { ChatTurnRequest } from "@/types/runtime";
-import { readInformationalResponseCache } from "../cache";
 import { buildPreferredLocalIntentSynthesisPrelude } from "../local-intent-orchestration/synthesis";
 import type { DirectLocalIntentLoader } from "../local-intent-orchestration/types";
 import { createModelInputAssembly } from "../model-input";
 import { runPostProviderTurn } from "../post-provider";
 import { runProviderModelTurn } from "../provider";
-import {
-  handleCachedInformationalTurn,
-  handleReadyResponseTurn,
-} from "./shortcuts";
+import { handleReadyResponseTurn } from "./shortcuts";
 import type { NativeTurnSetup, SettingsSnapshot, TurnPerfTrace } from "./types";
 
 type NativeTurnOptions = AgentTurnHooks & {
@@ -35,8 +31,6 @@ export interface NativeProviderStageInput {
 
 export interface NativeProviderStageDependencies {
   createModelInputAssembly: typeof createModelInputAssembly;
-  readInformationalResponseCache: typeof readInformationalResponseCache;
-  handleCachedInformationalTurn: typeof handleCachedInformationalTurn;
   buildPreferredLocalIntentSynthesisPrelude: typeof buildPreferredLocalIntentSynthesisPrelude;
   getProviderReadinessMessage: typeof getProviderReadinessMessage;
   handleReadyResponseTurn: typeof handleReadyResponseTurn;
@@ -46,8 +40,6 @@ export interface NativeProviderStageDependencies {
 
 const defaultDependencies: NativeProviderStageDependencies = {
   createModelInputAssembly,
-  readInformationalResponseCache,
-  handleCachedInformationalTurn,
   buildPreferredLocalIntentSynthesisPrelude,
   getProviderReadinessMessage,
   handleReadyResponseTurn,
@@ -76,22 +68,6 @@ export async function runNativeProviderStage(
     options: input.options,
     preferredLocalIntent: input.preferredLocalIntent,
   });
-
-  const responseCacheKey = modelInputAssembly.responseCacheKey;
-  const cachedResponse = await dependencies.handleCachedInformationalTurn({
-    context: input.context,
-    turn,
-    cachedResponse: responseCacheKey
-      ? dependencies.readInformationalResponseCache(responseCacheKey)
-      : undefined,
-    scheduleProfileObservation,
-    options: input.options,
-    perf: input.perf,
-    source: input.input.source,
-  });
-  if (cachedResponse) {
-    return cachedResponse;
-  }
 
   let localSynthesisPrelude: string | undefined;
   if (modelInputAssembly.requiresPreferredLocalIntentSynthesis) {
@@ -152,7 +128,6 @@ export async function runNativeProviderStage(
     response: providerResult.response,
     runFailureMessage: providerResult.runFailureMessage,
     settingsDuring: input.settingsDuring,
-    responseCacheKey,
     scheduleProfileObservation,
     loadDirectLocalIntent: input.loadDirectLocalIntent,
     approveDirectLocalIntent: input.approveDirectLocalIntent,

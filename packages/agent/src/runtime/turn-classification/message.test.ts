@@ -35,8 +35,11 @@ describe("message classification edge cases", () => {
 
   it("preserves social detection for simple greetings with punctuation", () => {
     expect(isSimpleGreetingMessage("Hi!")).toBe(true);
+    expect(isSimpleGreetingMessage("Hey there Doolittle!")).toBe(true);
     expect(isSimpleSocialMessage("How are you today?")).toBe(true);
+    expect(isSimpleSocialMessage("How is your night?")).toBe(true);
     expect(classifyTurnMessage("How are you today?").simpleChat).toBe(true);
+    expect(classifyTurnMessage("How is your night?").simpleChat).toBe(true);
   });
 
   it("treats code-heavy messages as non-simple informational turns", () => {
@@ -68,5 +71,25 @@ describe("message classification edge cases", () => {
       resolveTurnCapabilityProfile("what is the status of plugin health?"),
     ).toBe("full");
     expect(resolveTurnCapabilityProfile("hello")).toBe("minimal");
+  });
+
+  it("keeps social account capability questions out of the multi-step tool loop", () => {
+    const classification = classifyTurnMessage(
+      "Could you run your own twitter account? Do you have twitter integration?",
+    );
+
+    expect(classification).toMatchObject({
+      simpleChat: true,
+      likelyLocalTask: false,
+      requiresFullContext: false,
+      actionOriented: false,
+      informationalOnly: true,
+      shouldUseMultiStep: false,
+    });
+    expect(
+      resolveTurnCapabilityProfile(
+        "Could you run your own twitter account? Do you have twitter integration?",
+      ),
+    ).toBe("minimal");
   });
 });

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import type { AgentExecutionContext } from "@/runtime/chat";
-import { readInformationalResponseCache } from "./chat-turn/cache";
 import { runPostProviderTurn } from "./chat-turn/post-provider";
 
 function createContext(
@@ -125,9 +124,8 @@ describe("chat turn post-provider seam", () => {
     expect(harness.finishEvents).toEqual([]);
   });
 
-  it("finalizes fallback execution, writes cache, and completes the turn", async () => {
+  it("finalizes fallback execution without caching conversational output", async () => {
     const harness = createContext();
-    const cacheKey = "post-provider-cache-finalization";
 
     const result = await runPostProviderTurn({
       input: {
@@ -153,7 +151,6 @@ describe("chat turn post-provider seam", () => {
           maxTokens: 2048,
         },
       } as Parameters<typeof runPostProviderTurn>[0]["settingsDuring"],
-      responseCacheKey: cacheKey,
       scheduleProfileObservation: () => undefined,
       loadDirectLocalIntent: async () => ({
         directLocalIntent: {
@@ -174,7 +171,6 @@ describe("chat turn post-provider seam", () => {
       observedActionCount: 0,
       usedFallback: true,
     });
-    expect(readInformationalResponseCache(cacheKey)).toBe("fixed locally");
     expect(harness.storedMessages).toEqual(["fixed locally"]);
     expect(harness.finishEvents).toEqual([
       {
@@ -185,7 +181,7 @@ describe("chat turn post-provider seam", () => {
     ]);
   });
 
-  it("falls back to a simple greeting reply when the provider fails before acting", async () => {
+  it("does not synthesize canned greetings when the provider fails before acting", async () => {
     const harness = createContext();
 
     const result = await runPostProviderTurn({
@@ -222,13 +218,14 @@ describe("chat turn post-provider seam", () => {
 
     expect(result).toEqual({
       kind: "final",
-      response: "Yo. What do you want to work on?",
+      response:
+        "I couldn't get a usable response from OpenAI (gpt-4.1). Check `OPENAI_API_KEY` or switch to a linked provider with `/accounts`.",
       runFailureMessage: "provider offline",
       observedActionCount: 0,
       usedFallback: false,
     });
     expect(harness.storedMessages).toEqual([
-      "Yo. What do you want to work on?",
+      "I couldn't get a usable response from OpenAI (gpt-4.1). Check `OPENAI_API_KEY` or switch to a linked provider with `/accounts`.",
     ]);
     expect(harness.finishEvents).toEqual([
       {

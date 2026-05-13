@@ -32,7 +32,9 @@ export async function connectLinkedProvider(
       ? accounts.codex
       : provider === "claude-code"
         ? accounts.claudeCode
-        : accounts.elizaCloud;
+        : provider === "devin"
+          ? accounts.devin
+          : accounts.elizaCloud;
   const nativeReady = status.nativeReady ?? status.reusable;
   const fallbackReady = status.fallbackReady ?? false;
   const canActivate =
@@ -68,6 +70,7 @@ export async function refreshLinkedAccounts(
       resolveProviderCredentials("elizacloud"),
       resolveProviderCredentials("codex"),
       resolveProviderCredentials("claude-code"),
+      resolveProviderCredentials("devin"),
       refreshLinkedCodexCredentials().catch(() => undefined),
       refreshLinkedClaudeCodeCredentials().catch(() => undefined),
     ];
@@ -83,6 +86,11 @@ export async function refreshLinkedAccounts(
   if (provider === "codex") {
     await resolveProviderCredentials("codex");
     await refreshLinkedCodexCredentials();
+    return getLinkedProviderAccountsSnapshot();
+  }
+
+  if (provider === "devin") {
+    await resolveProviderCredentials("devin");
     return getLinkedProviderAccountsSnapshot();
   }
 

@@ -6,6 +6,7 @@ import { readJson, writeJson } from "./shared";
 import type {
   LinkedClaudeCodeCredentials,
   LinkedCodexCredentials,
+  LinkedDevinCredentials,
   LinkedElizaCloudCredentials,
   LinkedProviderName,
   ProviderAuthStoreShape,
@@ -48,6 +49,7 @@ export function persistProviderCredentials(
   credentials:
     | LinkedCodexCredentials
     | LinkedClaudeCodeCredentials
+    | LinkedDevinCredentials
     | LinkedElizaCloudCredentials
     | undefined,
 ): void {
@@ -61,6 +63,12 @@ export function persistProviderCredentials(
       return;
     }
   } else if (
+    provider === "devin" &&
+    !(credentials as LinkedDevinCredentials).command
+  ) {
+    return;
+  } else if (
+    provider !== "devin" &&
     !hasTokenCredentials(
       credentials as LinkedCodexCredentials | LinkedClaudeCodeCredentials,
     )

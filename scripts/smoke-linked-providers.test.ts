@@ -116,6 +116,14 @@ function createSnapshot(): LinkedProviderAccountsSnapshot {
       fallbackReady: false,
       detail: "claude detail",
     },
+    devin: {
+      provider: "devin",
+      available: false,
+      reusable: false,
+      nativeReady: false,
+      fallbackReady: false,
+      detail: "devin detail",
+    },
     elizaCloud: {
       provider: "elizacloud",
       available: false,
@@ -158,12 +166,14 @@ describe("smoke-linked-providers", () => {
       },
     );
 
-    expect(results).toHaveLength(2);
+    expect(results).toHaveLength(3);
     expect(results[0]?.provider).toBe("codex");
     expect(results[0]?.connected).toBeUndefined();
     expect(results[0]?.activated).toBe(false);
     expect(results[1]?.provider).toBe("claude-code");
     expect(results[1]?.connected).toBe(true);
+    expect(results[2]?.provider).toBe("devin");
+    expect(results[2]?.connected).toBeUndefined();
     expect(connectCalls).toEqual(["claude-code"]);
     expect(context.setCalls).toHaveLength(5);
   });
