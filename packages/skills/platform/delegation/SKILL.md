@@ -1,3 +1,9 @@
+---
+name: delegation
+description: Use this skill when splitting a larger job into child tasks or
+  supervised workstreams.
+---
+
 # Doolittle Delegation
 
 Use this skill when splitting a larger job into child tasks or supervised workstreams.

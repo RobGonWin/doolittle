@@ -1,3 +1,9 @@
+---
+name: execution
+description: Use this skill when choosing, validating, or documenting an
+  execution backend for Doolittle work.
+---
+
 # Doolittle Execution Backends
 
 Use this skill when choosing, validating, or documenting an execution backend for Doolittle work.

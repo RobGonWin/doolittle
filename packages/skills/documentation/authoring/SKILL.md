@@ -1,3 +1,9 @@
+---
+name: authoring
+description: Use this skill when writing or updating operator docs, usage notes,
+  or workspace guides for Doolittle.
+---
+
 # Doolittle Documentation Authoring
 
 Use this skill when writing or updating operator docs, usage notes, or workspace guides for Doolittle.

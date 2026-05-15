@@ -1,3 +1,9 @@
+---
+name: mcp
+description: Use this skill when discovering or invoking Model Context Protocol
+  tools and servers.
+---
+
 # Doolittle MCP
 
 Use this skill when discovering or invoking Model Context Protocol tools and servers.

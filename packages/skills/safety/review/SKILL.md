@@ -1,3 +1,9 @@
+---
+name: review
+description: Use this skill when a change, reply, or automation needs a quick
+  safety and policy pass before it ships or executes.
+---
+
 # Doolittle Safety Review
 
 Use this skill when a change, reply, or automation needs a quick safety and policy pass before it ships or executes.

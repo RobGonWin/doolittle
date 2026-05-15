@@ -1,3 +1,9 @@
+---
+name: release
+description: Use this skill when preparing, validating, or documenting a
+  release, rollout, or runtime upgrade for Doolittle.
+---
+
 # Doolittle Release Operations
 
 Use this skill when preparing, validating, or documenting a release, rollout, or runtime upgrade for Doolittle.

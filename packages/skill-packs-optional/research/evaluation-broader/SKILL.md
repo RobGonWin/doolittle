@@ -1,3 +1,8 @@
+---
+name: evaluation-broader
+description: Broaden evaluation coverage across workflows, benchmarks, and regression runs.
+---
+
 # Broader Evaluation
 
 ## Purpose

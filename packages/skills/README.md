@@ -74,6 +74,9 @@ Optional, higher-breadth packs live in the sibling [`packages/skill-packs-option
 
 ## Conventions
 
+- Every `SKILL.md` is a native ElizaOS skill document with YAML frontmatter:
+  `name` must match the skill directory, and `description` should be the routing
+  sentence the native loader can use for discovery.
 - Keep each `SKILL.md` short, specific, and Doolittle branded.
 - Prefer concrete deliverables over broad advisory language.
 - Use the smallest category that still captures the work cleanly.

@@ -1,3 +1,9 @@
+---
+name: repo-ops
+description: Use this skill when working inside a software repository and the
+  task depends on reliable local execution.
+---
+
 # Repo Ops
 
 Use this skill when working inside a software repository and the task depends on reliable local execution.
