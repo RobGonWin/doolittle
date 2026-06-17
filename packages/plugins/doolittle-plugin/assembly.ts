@@ -5,6 +5,7 @@ import {
   createMemoryAction,
   createMemoryNudgeEvaluator,
   createRepositoryAction,
+  createResearchAction,
   createSelfAwarenessProvider,
   createSessionSearchAction,
   createSkillsAction,
@@ -30,6 +31,7 @@ export function createDoolittlePluginSurface({
     createWorkspaceAction(services, config.workspaceDir),
     createTerminalAction(services),
     createRepositoryAction(services),
+    createResearchAction(),
   ];
   const providers: Provider[] = [
     ...getSessionProviders(),

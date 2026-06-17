@@ -2,6 +2,7 @@ export { createCronAction } from "@/actions/cron-action";
 export { createFileActions } from "@/actions/file-action";
 export { createMemoryAction } from "@/actions/memory-action";
 export { createRepositoryAction } from "@/actions/repository-action";
+export { createResearchAction } from "@/actions/research-action";
 export { createSessionSearchAction } from "@/actions/session-search-action";
 export { createSkillsAction } from "@/actions/skills-action";
 export { createTerminalAction } from "@/actions/terminal-action";
