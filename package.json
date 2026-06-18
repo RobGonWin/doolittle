@@ -2,6 +2,7 @@
   "name": "doolittle",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "bin": {
     "doolittle": "./packages/agent/src/index.ts"
