@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roblox Release and Ads Governance"
+  short_description: "Govern Roblox releases, exports, and ad spend"
+  default_prompt: "Use $release-ads-governance to review Roblox release artifacts and advertising controls."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roblox Group Access"
+  short_description: "Audit group roles and privileged memberships"
+  default_prompt: "Use $group-access to review Roblox group roles, memberships, and audit evidence."

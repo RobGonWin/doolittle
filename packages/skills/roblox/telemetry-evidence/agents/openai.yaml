@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roblox Telemetry Evidence"
+  short_description: "Verify Roblox analytics lineage and data quality"
+  default_prompt: "Use $telemetry-evidence to audit Roblox telemetry schemas, emitters, and evidence coverage."

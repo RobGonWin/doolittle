@@ -69,6 +69,14 @@ Optional, higher-breadth packs live in the sibling [`packages/skill-packs-option
   - code-generation evaluation, SWE-bench style review, and patch-quality checks
 - `media/voice/tts`
   - provider-backed text-to-speech, voice artifact generation, and speech audit notes
+- `roblox/open-cloud-access`
+  - API-key, OAuth, Secrets Store, scope, resource, and rotation governance
+- `roblox/telemetry-evidence`
+  - Roblox analytics lineage, trust boundaries, data quality, and repository evidence
+- `roblox/group-access`
+  - group roles, privileged memberships, automation accounts, and audit logs
+- `roblox/release-ads-governance`
+  - RTFusion exports, place publishing, sponsored campaigns, budgets, and attribution
 - `generated/*`
   - generated skills created from completed workstreams
 

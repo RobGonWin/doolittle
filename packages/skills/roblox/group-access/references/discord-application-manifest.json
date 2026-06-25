@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-06-25",
+  "application": {
+    "name": "1v1 Edit Arena Governance",
+    "applicationId": "1519541928990081124",
+    "ownerAccountLabel": "1v1EditArena",
+    "purpose": "Read-only governance reports and approved Doolittle operator commands",
+    "credentialVariable": "DISCORD_BOT_TOKEN",
+    "credentialValueRecorded": false,
+    "initialInstallCount": {
+      "servers": 0,
+      "users": 0
+    }
+  },
+  "repository": {
+    "fullName": "RobGonWin/1v1-edit-arena",
+    "branch": "prod",
+    "projectName": "1v1 Edit Arena",
+    "runtimeRoots": [
+      "src/ReplicatedStorage",
+      "src/ServerScriptService",
+      "src/ServerStorage",
+      "src/StarterPlayer"
+    ]
+  },
+  "robloxGroup": {
+    "name": "1v1 Edit Arena",
+    "groupId": "32736689",
+    "communityUrl": "https://www.roblox.com/communities/32736689/1v1-Edit-Arena",
+    "governanceRole": "Ownership and access-control root for the experience"
+  },
+  "robloxEnvironments": {
+    "production": {
+      "universeId": "5112018969",
+      "placeId": "14835231599",
+      "experienceUrl": "https://www.roblox.com/games/14835231599/1v1-Edit-Arena"
+    },
+    "staging": {
+      "universeId": "8279974211",
+      "placeId": "126501402641505"
+    }
+  },
+  "sourceEvidence": {
+    "README.md": "b27100804ca2f953f8f6581b237ead27ae8a2556",
+    "default.project.json": "2dd12a2a957e69dd7d3305bdae69efb0f9b43415",
+    "src/ReplicatedStorage/GameContents/GameSettings/GlobalSettings/ExperienceInfo.luau": "05aa62a55412a096f4a9eeaf85b772fcfc02050f",
+    "src/ServerStorage/+ServerLibrary/GameServices/+TrackingAnalyticsService/Get-IncludedAnalytics.luau": "4fae57891c8c843d80622234aeb1cd36e299c6f2",
+    "src/ServerStorage/+ServerLibrary/GameServices/+TrackingAnalyticsService/Queue-AnalyticsEvent.luau": "c273d3418595b6019ce8eab4b3a52fdde10c1882",
+    "src/ReplicatedStorage/GameContents/GameSettings/GlobalSettings/GameProgressionRequirements.luau": "4d1052b813bb0fe00fe123ca6e9a87f23af74b8a"
+  },
+  "implementationStatus": {
+    "discordTransportSupported": true,
+    "githubRepositoryAccessConfigured": true,
+    "robloxGovernanceSkillsPresent": true,
+    "discordGovernanceCollectorImplemented": false,
+    "elevatedDiscordGovernancePermissionsApproved": false
+  },
+  "prohibitedData": [
+    "discord bot token",
+    "webhook token",
+    "oauth client secret",
+    "authorization header",
+    "roblox api key",
+    "raw player telemetry",
+    "unrelated discord message content"
+  ]
+}

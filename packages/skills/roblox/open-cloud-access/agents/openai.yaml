@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roblox Open Cloud Access"
+  short_description: "Audit Roblox keys, scopes, and account access"
+  default_prompt: "Use $open-cloud-access to audit Roblox Open Cloud credentials without exposing secret values."

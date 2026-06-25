@@ -32,6 +32,10 @@ Curated skill families:
 - `research/action-bench` - [`packages/skills/research/action-bench/SKILL.md`](./research/action-bench/SKILL.md)
 - `research/autocoder` - [`packages/skills/research/autocoder/SKILL.md`](./research/autocoder/SKILL.md)
 - `media/voice/tts` - [`packages/skills/media/voice/tts/SKILL.md`](./media/voice/tts/SKILL.md)
+- `roblox/open-cloud-access` - [`packages/skills/roblox/open-cloud-access/SKILL.md`](./roblox/open-cloud-access/SKILL.md)
+- `roblox/telemetry-evidence` - [`packages/skills/roblox/telemetry-evidence/SKILL.md`](./roblox/telemetry-evidence/SKILL.md)
+- `roblox/group-access` - [`packages/skills/roblox/group-access/SKILL.md`](./roblox/group-access/SKILL.md)
+- `roblox/release-ads-governance` - [`packages/skills/roblox/release-ads-governance/SKILL.md`](./roblox/release-ads-governance/SKILL.md)
 
 Generated skill families:
 
