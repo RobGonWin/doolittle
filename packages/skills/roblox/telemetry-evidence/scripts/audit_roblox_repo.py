@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCANNER_VERSION = "1.0.0"
+SCANNER_VERSION = "1.1.0"
 IGNORED_DIRS = {
     ".git",
     "node_modules",
@@ -24,9 +24,27 @@ IGNORED_DIRS = {
     ".next",
 }
 IGNORED_FILES = {
+    ".env",
+    "api_key.txt",
+    "group_asset_import_key.txt",
     "package-lock.json",
+    "pc-receive-session-data.json",
     "reactBundle.js",
     "reactBundle.js.LICENSE.txt",
+    "user_asset_import_key.txt",
+}
+DOC_OR_TEST_PARTS = {
+    "__tests__",
+    "docs",
+    "examples",
+    "fixtures",
+    "references",
+    "testdata",
+}
+PLACEHOLDER_FILE_NAMES = {
+    ".env.example",
+    "env.example",
+    "example.env",
 }
 TEXT_SUFFIXES = {
     ".lua",
@@ -81,6 +99,24 @@ SECRET_ASSIGNMENT = re.compile(
     """
 )
 
+ANALYTIC_SAFE_PATH = re.compile(r"\bAnalyticSafePaths\b")
+ANALYTICS_TYPE_DATA = re.compile(r"\bAnalyticsTypeData\b")
+ANALYTICS_CALL = re.compile(
+    r"\b(?:AnalyticsService:)?(?:LogCustomEvent|LogEconomyEvent|"
+    r"LogFunnelStepEvent|LogOnboardingFunnelStepEvent|LogProgressionEvent)\b"
+)
+QUEUE_VALIDATION = re.compile(
+    r"\b(?:IsSentFromClient|AnalyticSafePaths|Reject|Invalid|Queue|RateLimit|"
+    r"InvokedFromAnalyticsQueue)\b"
+)
+ONBOARDING_ROUTING = re.compile(
+    r"\b(?:Onboarding|Miscellaneous|GameLoop|ChangePlayerFirstTimeExperienceStep)\b"
+)
+TRUST_BOUNDARY = re.compile(
+    r"\b(?:OnServerEvent|OnServerFired|RemoteEvent|RemoteFunction|"
+    r"IsSentFromClient|Player|UserId)\b"
+)
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -119,21 +155,161 @@ def iter_text_files(root: Path):
                 yield path
 
 
+def path_class(path: Path, root: Path) -> str:
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        relative = path
+    parts = {part.lower() for part in relative.parts}
+    name = relative.name.lower()
+    if name in PLACEHOLDER_FILE_NAMES:
+        return "placeholder"
+    if any(part in DOC_OR_TEST_PARTS for part in parts):
+        return "documentation_or_test"
+    if name.endswith((".test.ts", ".test.py", ".spec.ts", ".spec.js")):
+        return "documentation_or_test"
+    return "runtime"
+
+
 def line_record(path: Path, root: Path, line_number: int) -> dict[str, Any]:
     return {
         "path": path.relative_to(root).as_posix(),
         "line": line_number,
+        "classification": path_class(path, root),
     }
 
 
-def scan(root: Path) -> dict[str, Any]:
+def count_runtime(records: list[dict[str, Any]]) -> int:
+    return sum(1 for record in records if record.get("classification") == "runtime")
+
+
+def count_actionable_secret_indicators(records: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for record in records
+        if record.get("classification") not in {"documentation_or_test", "placeholder"}
+    )
+
+
+def load_public_association(
+    root: Path,
+    association_file: Path | None = None,
+) -> dict[str, Any] | None:
+    association_path = association_file or (root / "public-association.json")
+    if not association_path.is_file():
+        return None
+    try:
+        return json.loads(association_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def append_lineage_record(
+    bucket: list[dict[str, Any]],
+    path: Path,
+    root: Path,
+    line_number: int,
+    label: str,
+) -> None:
+    bucket.append(
+        {
+            **line_record(path, root, line_number),
+            "label": label,
+        }
+    )
+
+
+def extract_event_lineage(root: Path) -> dict[str, Any]:
+    lineage: dict[str, Any] = {
+        "schemaVersion": "1.0",
+        "scannerVersion": SCANNER_VERSION,
+        "registryReferences": [],
+        "emitters": [],
+        "serverValidationGates": [],
+        "trustBoundaries": [],
+        "onboardingRouting": [],
+        "robloxAnalyticsCalls": [],
+        "notes": [
+            "Lineage records contain paths, line numbers, and labels only; source snippets and player telemetry are intentionally excluded.",
+            "Repository evidence proves source-level governance surfaces, not live Creator Dashboard values.",
+        ],
+    }
+
+    for path in iter_text_files(root):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            if ANALYTIC_SAFE_PATH.search(line):
+                append_lineage_record(
+                    lineage["registryReferences"],
+                    path,
+                    root,
+                    line_number,
+                    "analytics-safe-path-registry",
+                )
+            if ANALYTICS_TYPE_DATA.search(line):
+                append_lineage_record(
+                    lineage["emitters"],
+                    path,
+                    root,
+                    line_number,
+                    "analytics-type-data-construction",
+                )
+            if QUEUE_VALIDATION.search(line) and "Analytics" in path.as_posix():
+                append_lineage_record(
+                    lineage["serverValidationGates"],
+                    path,
+                    root,
+                    line_number,
+                    "analytics-queue-validation",
+                )
+            if TRUST_BOUNDARY.search(line) and (
+                "Network" in path.as_posix()
+                or "Communicator" in path.as_posix()
+                or "Analytics" in path.as_posix()
+            ):
+                append_lineage_record(
+                    lineage["trustBoundaries"],
+                    path,
+                    root,
+                    line_number,
+                    "client-server-trust-boundary",
+                )
+            if ONBOARDING_ROUTING.search(line) and "Analytics" in path.as_posix():
+                append_lineage_record(
+                    lineage["onboardingRouting"],
+                    path,
+                    root,
+                    line_number,
+                    "onboarding-miscellaneous-funnel-routing",
+                )
+            if ANALYTICS_CALL.search(line):
+                append_lineage_record(
+                    lineage["robloxAnalyticsCalls"],
+                    path,
+                    root,
+                    line_number,
+                    "roblox-analytics-service-call-or-wrapper",
+                )
+
+    stable_lineage = json.dumps(lineage, sort_keys=True, separators=(",", ":"))
+    lineage["schemaHash"] = hashlib.sha256(stable_lineage.encode("utf-8")).hexdigest()
+    return lineage
+
+
+def scan(root: Path, association_file: Path | None = None) -> dict[str, Any]:
     matches: dict[str, list[dict[str, Any]]] = {
         name: [] for name in PATTERNS
     }
     secret_indicators: list[dict[str, Any]] = []
     evidence_files: dict[str, str] = {}
+    text_files_scanned = 0
 
     for path in iter_text_files(root):
+        text_files_scanned += 1
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -164,40 +340,62 @@ def scan(root: Path) -> dict[str, Any]:
     remote = git_value(root, "config", "--get", "remote.origin.url")
 
     findings: list[dict[str, Any]] = []
-    if secret_indicators:
+    actionable_secret_count = count_actionable_secret_indicators(secret_indicators)
+    runtime_cookie_count = count_runtime(matches["roblox_cookie"])
+    runtime_windows_path_count = count_runtime(matches["absolute_windows_path"])
+    runtime_destructive_file_count = count_runtime(matches["destructive_file_operation"])
+    if actionable_secret_count:
         findings.append(
             {
                 "ruleId": "RBX-CRED-001",
                 "severity": "critical",
                 "summary": "Potential literal credential assignments were detected.",
-                "evidenceCount": len(secret_indicators),
+                "evidenceCount": actionable_secret_count,
             }
         )
-    if matches["roblox_cookie"]:
+    if runtime_cookie_count:
         findings.append(
             {
                 "ruleId": "RBX-CRED-002",
                 "severity": "critical",
-                "summary": ".ROBLOSECURITY references require removal or manual-only handling.",
+                "summary": "Roblox session cookie marker references were found in runtime code.",
+                "evidenceCount": runtime_cookie_count,
+            }
+        )
+    elif matches["roblox_cookie"]:
+        findings.append(
+            {
+                "ruleId": "RBX-CRED-002-DOC",
+                "severity": "informational",
+                "summary": "Roblox session cookie marker references were limited to docs, tests, or placeholders.",
                 "evidenceCount": len(matches["roblox_cookie"]),
             }
         )
-    if matches["absolute_windows_path"]:
+    if runtime_windows_path_count:
         findings.append(
             {
                 "ruleId": "RBX-RELEASE-001",
                 "severity": "medium",
                 "summary": "Hard-coded absolute Windows paths reduce portability and provenance.",
+                "evidenceCount": runtime_windows_path_count,
+            }
+        )
+    elif matches["absolute_windows_path"]:
+        findings.append(
+            {
+                "ruleId": "RBX-RELEASE-001-DOC",
+                "severity": "informational",
+                "summary": "Absolute Windows paths were limited to docs, tests, or placeholders.",
                 "evidenceCount": len(matches["absolute_windows_path"]),
             }
         )
-    if matches["destructive_file_operation"]:
+    if runtime_destructive_file_count:
         findings.append(
             {
                 "ruleId": "RBX-REPO-001",
                 "severity": "medium",
                 "summary": "Destructive file operations require root confinement and journaling.",
-                "evidenceCount": len(matches["destructive_file_operation"]),
+                "evidenceCount": runtime_destructive_file_count,
             }
         )
     if matches["analytics_api"] and not matches["analytics_service"]:
@@ -210,6 +408,20 @@ def scan(root: Path) -> dict[str, Any]:
             }
         )
 
+    event_lineage = extract_event_lineage(root)
+    association = load_public_association(root, association_file)
+    redaction_audit = {
+        "passed": True,
+        "sourceSnippetsCollected": False,
+        "playerLevelTelemetryCollected": False,
+        "credentialValuesCollected": False,
+        "secretValuesRedacted": len(secret_indicators),
+        "notes": [
+            "Evidence records omit source snippets and raw telemetry payloads.",
+            "Credential-looking assignment values are replaced with <redacted>.",
+        ],
+    }
+
     return {
         "schemaVersion": "1.0",
         "scannerVersion": SCANNER_VERSION,
@@ -221,19 +433,149 @@ def scan(root: Path) -> dict[str, Any]:
             "dirty": bool(status),
         },
         "coverage": {
-            "textFilesScanned": sum(1 for _ in iter_text_files(root)),
+            "textFilesScanned": text_files_scanned,
             "ignoredDirectories": sorted(IGNORED_DIRS),
             "ignoredFiles": sorted(IGNORED_FILES),
             "liveRobloxTelemetryCollected": False,
             "credentialValuesCollected": False,
+            "sourceSnippetsCollected": False,
         },
+        "association": association,
+        "schemaHash": event_lineage["schemaHash"],
         "inventory": {
             name: {"count": len(records), "locations": records}
             for name, records in matches.items()
         },
+        "eventLineageSummary": {
+            key: len(value)
+            for key, value in event_lineage.items()
+            if isinstance(value, list)
+        },
         "secretIndicators": secret_indicators,
+        "redactionAudit": redaction_audit,
         "evidenceFiles": evidence_files,
         "findings": findings,
+    }
+
+
+def build_manifest(scan_result: dict[str, Any]) -> dict[str, Any]:
+    repository = scan_result["repository"]
+    association = scan_result.get("association")
+    return {
+        "schemaVersion": "1.0",
+        "scannerVersion": SCANNER_VERSION,
+        "generatedAt": scan_result["collectedAt"],
+        "repository": repository,
+        "association": association,
+        "schemaHash": scan_result["schemaHash"],
+        "privacy": {
+            "privateSourceCodeMirrored": False,
+            "sourceSnippetsCollected": False,
+            "playerLevelTelemetryCollected": False,
+            "credentialValuesCollected": False,
+        },
+        "artifacts": [
+            "manifest.json",
+            "repository-scan.json",
+            "event-lineage.json",
+            "findings.json",
+            "report.md",
+            "checksums.sha256",
+        ],
+    }
+
+
+def build_report(scan_result: dict[str, Any]) -> str:
+    repository = scan_result["repository"]
+    coverage = scan_result["coverage"]
+    findings = scan_result["findings"]
+    association = scan_result.get("association") or {}
+    public_adapter = association.get("public_adapter", {}).get("repository", "unknown")
+    private_source = association.get("private_game_source", {}).get(
+        "repository", "unknown"
+    )
+    finding_lines = [
+        f"- {finding['severity']}: {finding['ruleId']} - {finding['summary']} "
+        f"({finding['evidenceCount']} records)"
+        for finding in findings
+    ] or ["- No actionable findings from repository evidence."]
+
+    return "\n".join(
+        [
+            "# Roblox Telemetry Governance Evidence",
+            "",
+            f"- Repository: {repository.get('remote') or repository.get('path')}",
+            f"- Commit: {repository.get('commit') or 'unknown'}",
+            f"- Dirty worktree: {repository.get('dirty')}",
+            f"- Scanner version: {SCANNER_VERSION}",
+            f"- Schema hash: {scan_result['schemaHash']}",
+            f"- Text files scanned: {coverage['textFilesScanned']}",
+            f"- Public adapter: {public_adapter}",
+            f"- Private source: {private_source}",
+            "",
+            "## Privacy Boundary",
+            "",
+            "- Source snippets are not collected.",
+            "- Player-level telemetry is not collected.",
+            "- Credential-looking values are redacted.",
+            "- Repository evidence does not prove live Roblox dashboard values.",
+            "",
+            "## Findings",
+            "",
+            *finding_lines,
+            "",
+        ]
+    )
+
+
+def write_json(path: Path, payload: Any) -> None:
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_evidence_package(
+    root: Path,
+    evidence_dir: Path,
+    association_file: Path | None = None,
+) -> dict[str, Any]:
+    result = scan(root, association_file)
+    event_lineage = extract_event_lineage(root)
+    manifest = build_manifest(result)
+    findings_payload = {
+        "schemaVersion": "1.0",
+        "scannerVersion": SCANNER_VERSION,
+        "findings": result["findings"],
+        "redactionAudit": result["redactionAudit"],
+    }
+
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    artifacts: dict[str, str] = {
+        "manifest.json": "",
+        "repository-scan.json": "",
+        "event-lineage.json": "",
+        "findings.json": "",
+        "report.md": "",
+    }
+
+    write_json(evidence_dir / "manifest.json", manifest)
+    write_json(evidence_dir / "repository-scan.json", result)
+    write_json(evidence_dir / "event-lineage.json", event_lineage)
+    write_json(evidence_dir / "findings.json", findings_payload)
+    (evidence_dir / "report.md").write_text(build_report(result), encoding="utf-8")
+
+    for name in artifacts:
+        artifacts[name] = sha256(evidence_dir / name)
+
+    checksums = "".join(f"{digest}  {name}\n" for name, digest in sorted(artifacts.items()))
+    (evidence_dir / "checksums.sha256").write_text(checksums, encoding="utf-8")
+    artifacts["checksums.sha256"] = sha256(evidence_dir / "checksums.sha256")
+
+    return {
+        "evidenceDir": str(evidence_dir),
+        "manifest": manifest,
+        "checksums": artifacts,
     }
 
 
@@ -241,13 +583,25 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("repository", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--evidence-dir", type=Path)
+    parser.add_argument("--association-file", type=Path)
     args = parser.parse_args()
 
     root = args.repository.resolve()
     if not root.is_dir():
         parser.error(f"repository is not a directory: {root}")
 
-    result = scan(root)
+    if args.evidence_dir:
+        result = write_evidence_package(
+            root,
+            args.evidence_dir.resolve(),
+            args.association_file.resolve() if args.association_file else None,
+        )
+    else:
+        result = scan(
+            root,
+            args.association_file.resolve() if args.association_file else None,
+        )
     encoded = json.dumps(result, indent=2, sort_keys=True)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

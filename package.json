@@ -38,6 +38,8 @@
     "lint:check": "bunx @biomejs/biome check .",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
+    "test:governance": "python -m unittest -v packages/skills/roblox/telemetry-evidence/scripts/test_audit_roblox_repo.py packages/skills/roblox/group-access/scripts/test_audit_discord_governance.py",
+    "audit:discord-governance": "python packages/skills/roblox/group-access/scripts/audit_discord_governance.py",
     "test:e2e": "playwright test",
     "check:repo-hygiene": "bun run scripts/check-repo-hygiene.ts",
     "check:plugin-boundaries": "bun run scripts/check-plugin-boundaries.ts",

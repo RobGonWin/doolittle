@@ -86,6 +86,7 @@ Keep the layers clean:
 
 - [`docs/quickstart.md`](./docs/quickstart.md) for install-to-ready in one pass
 - [`docs/operator-loop.md`](./docs/operator-loop.md) for the daily shell/operator rhythm
+- [`docs/research-grade-governance.md`](./docs/research-grade-governance.md) for reproducible private governance evidence
 
 ---
 

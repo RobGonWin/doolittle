@@ -3,6 +3,7 @@ import { isApiRequestAuthorized } from "@/server/auth";
 import { json } from "@/server/responses";
 import { dispatchRouteHandlers } from "@/server/router";
 import { apiRouteHandlers } from "@/server/routes";
+import { isRobloxGovernancePublicRoute } from "@/server/routes/roblox-governance-mcp";
 
 let activeApiServer: ReturnType<typeof Bun.serve> | null = null;
 let activeApiServerAddress: string | null = null;
@@ -30,6 +31,7 @@ export function startApiServer(context: AppContext): void {
       }
 
       if (
+        !isRobloxGovernancePublicRoute(url) &&
         !isApiRequestAuthorized(
           { host: context.config.host, apiToken: context.config.apiToken },
           request,

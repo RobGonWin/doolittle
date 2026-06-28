@@ -5,7 +5,7 @@
 Please report security issues **privately** — do not open a public issue for an
 unpatched vulnerability.
 
-- Use GitHub's [private vulnerability reporting](https://github.com/SYMBaiEX/doolittle/security/advisories/new)
+- Use GitHub's [private vulnerability reporting](https://github.com/RobGonWin/doolittle/security/advisories/new)
   ("Report a vulnerability" under the **Security** tab), or
 - Open a minimal private channel with the maintainers.
 

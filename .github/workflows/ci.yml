@@ -2,7 +2,17 @@ name: ci
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -29,6 +39,9 @@ jobs:
 
       - name: Unit tests
         run: bun test
+
+      - name: Governance evidence tests
+        run: bun run test:governance
 
       - name: Build
         run: bun run build

@@ -169,6 +169,21 @@ collection requirement for each enabled privileged intent.
 
 Install to the single controlled 1v1 Edit Arena server first.
 
+Private research configuration:
+
+- Disable `User Install`.
+- Keep `Guild Install`.
+- Set `Install Link` to `None`. Discord requires this before a private bot can
+  be saved.
+- Install from the owner-only OAuth2 URL generator rather than publishing a
+  default authorization link.
+
+Owner installation URL for the initial permission set:
+
+```text
+https://discord.com/oauth2/authorize?client_id=1519541928990081124&permissions=117760&integration_type=0&scope=bot
+```
+
 Initial transport permissions:
 
 - View Channels
@@ -180,8 +195,8 @@ Initial transport permissions:
 Do not request `Administrator`.
 
 The current Doolittle Discord adapter supports message delivery but does not yet
-perform the governance collection described below. Therefore, do not grant
-elevated governance permissions until the collector exists and has tests.
+perform ordinary Discord Gateway ingestion. The governance collector is a
+separate read-only API client and does not require the bot to be public.
 
 Later read-only governance permissions:
 
@@ -198,6 +213,7 @@ Keep these values in `.env`:
 
 ```dotenv
 DISCORD_BOT_TOKEN=<secret>
+DISCORD_GOVERNANCE_GUILD_ID=<controlled guild id>
 DOOLITTLE_ALLOW_ALL_USERS=false
 DOOLITTLE_PAIRING_MODE=pair
 ```
@@ -253,7 +269,7 @@ Default retention:
 
 ## Required collector controls
 
-Before granting elevated Discord permissions, implement and test:
+The collector under `scripts/audit_discord_governance.py` enforces:
 
 1. A fixed allowlist of read-only Discord routes.
 2. A fixed allowlist containing only the controlled guild ID.
@@ -262,8 +278,31 @@ Before granting elevated Discord permissions, implement and test:
 4. Pagination and truncation reporting.
 5. SHA-256 evidence manifests without secret material.
 6. Rate-limit handling with bounded retries.
-7. Execution approval for every POST, PUT, PATCH, or DELETE request.
-8. Tests proving the governance action cannot call mutation routes.
+7. Complete prohibition of POST, PUT, PATCH, and DELETE requests.
+8. Tests proving the governance action cannot call mutation routes or arbitrary
+   GET routes.
+
+Run the non-network control tests:
+
+```bash
+bun run test:governance
+```
+
+Run the baseline live collection:
+
+```bash
+bun run audit:discord-governance
+```
+
+Only after explicitly granting the corresponding read permissions, collect
+audit logs, integrations, and webhook metadata:
+
+```bash
+bun run audit:discord-governance -- --include-elevated
+```
+
+Evidence is written beneath `.doolittle/governance/discord/`, which is ignored
+by Git. Publish only a deliberately reviewed and redacted evidence package.
 
 Minimum read-only collection:
 
@@ -310,7 +349,10 @@ As recorded on June 25, 2026:
 - Doolittle can send Discord messages and participate in the gateway.
 - GitHub is authenticated separately through the local GitHub CLI.
 - The Roblox governance skills and redacted repository scanner exist.
-- A Discord governance collector/action has not yet been implemented.
+- A fixed-guild Discord governance collector is implemented with GET-only route
+  enforcement, redaction, bounded retries, coverage reporting, SHA-256
+  manifests, and mutation-denial tests.
+- Live guild evidence has not been collected in this repository state.
 
-Do not describe the Discord governance audit as operational until the collector,
-route allowlist, redaction, and tests are present.
+Describe the collector as tested, not operational, until a live evidence package
+records the controlled guild, bot identity, coverage, and collection gaps.

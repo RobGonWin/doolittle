@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "relationship": "public_mcp_oauth_adapter_for_private_roblox_game_source",
+  "public_adapter": {
+    "repository": "RobGonWin/doolittle",
+    "repository_id": 1279785952,
+    "visibility": "public",
+    "default_branch": "main"
+  },
+  "private_game_source": {
+    "repository": "RobGonWin/1v1-edit-arena",
+    "repository_id": 974969495,
+    "visibility": "private",
+    "default_branch": "prod",
+    "roblox_experience_name": "1v1 Edit Arena"
+  },
+  "owner": {
+    "login": "RobGonWin",
+    "github_user_id": 177498987
+  },
+  "mcp": {
+    "public_https_endpoint": null,
+    "suggested_hostname_slug": "1v1-edit-arena-governance",
+    "example_public_https_endpoint": "https://1v1-edit-arena-governance.<owned-domain>/mcp",
+    "expected_path": "/mcp",
+    "health_path": "/mcp/health",
+    "well_known_association_path": "/.well-known/project-association.json",
+    "authentication": "Mixed OAuth"
+  },
+  "privacy": {
+    "private_source_code_is_mirrored": false,
+    "secrets_are_included": false
+  },
+  "verification": {
+    "github_metadata_verified_on": "2026-06-25",
+    "verified_public_adapter_repo_visibility": "public",
+    "verified_private_game_repo_visibility": "private",
+    "verified_shared_github_owner_id": 177498987
+  }
+}

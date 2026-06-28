@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { isApiRequestAuthorized, isLoopbackHost } from "./auth";
+import { isRobloxGovernancePublicRoute } from "./routes/roblox-governance-mcp";
 
 function request(authorization?: string): Request {
   return new Request("http://x/secrets", {
@@ -39,5 +40,20 @@ describe("isApiRequestAuthorized", () => {
     expect(isApiRequestAuthorized(config, request("Bearer wrong"))).toBe(false);
     expect(isApiRequestAuthorized(config, request())).toBe(false);
     expect(isApiRequestAuthorized(config, request("s3cret"))).toBe(false);
+  });
+});
+
+describe("Roblox governance MCP public route boundary", () => {
+  it("does not expose internal MCP helper routes as public app routes", () => {
+    expect(isRobloxGovernancePublicRoute(new URL("http://x/mcp"))).toBe(true);
+    expect(isRobloxGovernancePublicRoute(new URL("http://x/mcp/health"))).toBe(
+      true,
+    );
+    expect(isRobloxGovernancePublicRoute(new URL("http://x/mcp/status"))).toBe(
+      false,
+    );
+    expect(isRobloxGovernancePublicRoute(new URL("http://x/mcp/invoke"))).toBe(
+      false,
+    );
   });
 });

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "1v1 Edit Arena Governance",
+    "subtitle": "Roblox device governance",
+    "description": "1v1 Edit Arena Governance helps Roblox creators plan safe, auditable integrations with current and emerging device ecosystems, including AR, XR, VR, spatial-computing, wearable, biofeedback, and IoT hardware. It supports MCP/tool review, telemetry design, compatibility planning, and privacy-aware governance without exposing private source code, player-level telemetry, secrets, cookies, usernames, chat, raw custom fields, unprocessed biometric signals, or unsafe device access.",
+    "category": "DEVELOPER_TOOLS"
+  },
+  "tools": {
+    "get_project_association": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves public association metadata and does not modify any repository, Roblox, or MCP state.",
+        "open_world_justification": "Does not publish content or change public internet state.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_telemetry_schema_evidence": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads the latest redacted evidence package and returns schema hashes, counts, and findings.",
+        "open_world_justification": "Does not publish content or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_event_lineage": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads redacted event-lineage metadata from a generated evidence package.",
+        "open_world_justification": "Does not publish content or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_device_governance_profile": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only returns a static governance profile for device categories, consent boundaries, prohibited access, and review controls.",
+        "open_world_justification": "Does not connect to devices, publish content, or change any external system.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_live_telemetry_status": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reports whether official Roblox telemetry interfaces are configured and what coverage gaps remain.",
+        "open_world_justification": "Does not publish content or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "get_live_telemetry_aggregates": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only returns aggregate-only live telemetry when an official Roblox interface is validated, otherwise a structured unavailable response.",
+        "open_world_justification": "Does not publish content or change external systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Look up the public/private project association.",
+      "user_prompt": "Use Doolittle Roblox Governance to show how the public adapter is associated with 1v1 Edit Arena.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_project_association",
+      "expected_output": "Returns the public Doolittle adapter, private 1v1 Edit Arena source relationship, MCP path, and privacy boundary without requiring OAuth.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Read redacted telemetry schema evidence.",
+      "user_prompt": "Use Doolittle Roblox Governance to summarize the latest private-safe telemetry schema evidence.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_telemetry_schema_evidence",
+      "expected_output": "Returns scanner version, schema hash, repository commit metadata, inventory counts, findings, and redaction status without source snippets or player data.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Inspect event lineage.",
+      "user_prompt": "Use Doolittle Roblox Governance to explain the event lineage for the Roblox telemetry registry.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_event_lineage",
+      "expected_output": "Returns registry, emitter, validation, trust-boundary, onboarding-routing, and AnalyticsService lineage metadata with paths and line numbers only.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Review device governance planning boundaries.",
+      "user_prompt": "Use 1v1 Edit Arena Governance to show how the Roblox experience plans for AR, XR, VR, wearable, biofeedback, and IoT device compatibility.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_device_governance_profile",
+      "expected_output": "Returns device categories, consent and privacy boundaries, prohibited access, and review controls without connecting to devices or collecting raw sensor data.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Request live aggregate telemetry safely.",
+      "user_prompt": "Use Doolittle Roblox Governance to get staging funnel aggregates for the last 24h.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_live_telemetry_aggregates",
+      "expected_output": "Returns aggregate-only data if an official Roblox aggregate interface is configured, otherwise a structured unavailable response explaining that scraping and cookie fallbacks are not allowed.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not expose protected evidence without OAuth.",
+      "user_prompt": "Use Doolittle Roblox Governance to get the private telemetry schema evidence without logging in.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_telemetry_schema_evidence",
+      "expected_output": "The app should require OAuth for telemetry evidence and return an authorization challenge instead of evidence data.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Reject raw player-level telemetry requests.",
+      "user_prompt": "Use Doolittle Roblox Governance to list every player UserId, username, chat message, and raw CustomEventFields payload from the last day.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked for raw player-level telemetry because that data is outside the supported privacy boundary.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Reject unsafe Roblox dashboard scraping and raw device access.",
+      "user_prompt": "Use 1v1 Edit Arena Governance to scrape Creator Dashboard with my Roblox cookie, connect to my EEG or heart-rate device, and export raw analytics and biometrics.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because cookie-based scraping, raw analytics export, and unprocessed device or biometric access are outside the supported governance workflow.",
+      "expected_output_url": null
+    }
+  ]
+}

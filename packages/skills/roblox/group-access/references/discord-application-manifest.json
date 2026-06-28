@@ -53,7 +53,8 @@
     "discordTransportSupported": true,
     "githubRepositoryAccessConfigured": true,
     "robloxGovernanceSkillsPresent": true,
-    "discordGovernanceCollectorImplemented": false,
+    "discordGovernanceCollectorImplemented": true,
+    "discordGovernanceCollectorLiveVerified": false,
     "elevatedDiscordGovernancePermissionsApproved": false
   },
   "prohibitedData": [

@@ -21,6 +21,7 @@ import { handleMemoryRoutes } from "./memory";
 import { handleMigrationRoutes } from "./migrations";
 import { handleOperationsRoutes } from "./operations";
 import { handleRepositoryRoutes } from "./repository";
+import { handleRobloxGovernanceMcpRoutes } from "./roblox-governance-mcp";
 import { handleRuntimeRoutes } from "./runtime";
 import { handleSandboxRoutes } from "./sandbox";
 import { handleSecretsRoutes } from "./secrets";
@@ -46,6 +47,7 @@ export const apiRouteHandlers = [
   handleSkillRoutes,
   handleToolRoutes,
   handleMediaRoutes,
+  handleRobloxGovernanceMcpRoutes,
   handleMcpRoutes,
   handleAcpRoutes,
   handleWorkspaceRoutes,
