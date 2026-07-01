@@ -12,6 +12,12 @@ Roblox documents that API-key authority derives from the owning user, including 
 - Use a dedicated alternate account with only the minimum target-group role for group automation.
 - Remove unused keys. Unused or unmodified keys can auto-expire after 60 days.
 
+Creator Dashboard **Experience Secrets** are a different feature. They store
+secrets for use by an experience through `HttpService`; they are not where an
+external Doolittle process creates or stores its Open Cloud API key. Create the
+external key on Creator Dashboard's Credentials / API Keys page and inject it
+into the Doolittle runtime from a private environment or secret manager.
+
 ## Required inventory fields
 
 Record only metadata:
@@ -60,3 +66,15 @@ const response = await fetch(url, {
 ```
 
 Keep the value in the process environment or secret manager. Log only the request purpose, resource identifier, status code, Roblox request ID when available, and a redacted credential label.
+
+## Doolittle policy boundary
+
+The runtime policy is additive to Roblox scopes. It can deny an operation but
+must never treat a local flag as permission Roblox did not grant. The safe
+initial posture is `read-only`, `dry-run`, approval required, production
+mutations disabled, and every mutation capability disabled.
+
+Before a staging publisher is introduced, use a separate API key restricted to
+the staging universe/place and enable only `place-publishing`. Keep the public
+governance MCP read-only; a private release worker owns the key and invokes the
+policy check immediately before an Open Cloud request.

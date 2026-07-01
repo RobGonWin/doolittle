@@ -35,8 +35,14 @@ If an older local package was generated before association metadata was embedded
 
 Live aggregate tools use official Roblox-supported interfaces only. If aggregate AnalyticsService export is not available through an official interface, the tool returns `available: false` with a reason instead of scraping Creator Dashboard or accepting cookie material.
 
+Open Cloud setup, environment separation, and the fail-closed local mutation
+policy are documented in `docs/roblox-open-cloud-integration.md`. The public MCP
+may report that posture but remains read-only and never owns a Roblox key in
+production.
+
 ## Proof documents
 
 - `docs/roblox-studio-mcp-boundary.md` documents the split between local Roblox Studio MCP and the public ChatGPT Apps MCP endpoint.
+- `docs/roblox-open-cloud-integration.md` maps the existing automation control plane onto scoped API-key lanes without duplicating it.
 - `docs/chatgpt-developer-mode-proof.md` lists the Developer Mode prompts, expected tools, and negative tests for the submission demo.
 - `docs/data-governance-proof.md` records the no-secret test commands and latest targeted governance results.

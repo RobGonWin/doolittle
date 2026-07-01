@@ -6,6 +6,7 @@ import {
   sanitizeCoverage,
   sanitizeRepository,
 } from "./evidence";
+import { readRobloxOpenCloudPolicy } from "./open-cloud-policy";
 import {
   getRobloxGovernanceMcpTool,
   ROBLOX_GOVERNANCE_MCP_TOOLS,
@@ -276,18 +277,22 @@ async function callTool(
   }
 
   if (name === "get_live_telemetry_status") {
-    const hasOpenCloudKey = Boolean(
-      process.env.ROBLOX_OPEN_CLOUD_API_KEY?.trim(),
-    );
+    const openCloudPolicy = readRobloxOpenCloudPolicy();
     const structuredContent = {
-      configured: hasOpenCloudKey,
+      configured: openCloudPolicy.configured,
       provider: "Roblox official Open Cloud or MCP-supported interfaces",
       officialInterfacesOnly: true,
-      environments: ["staging", "production"],
+      authMode: openCloudPolicy.authMode,
+      accessMode: openCloudPolicy.accessMode,
+      environments: openCloudPolicy.allowedEnvironments,
+      dryRun: openCloudPolicy.dryRun,
+      mutationsEnabled: false,
+      configurationValid: openCloudPolicy.configurationIssues.length === 0,
       lastCollectionTime: null,
-      coverageGaps: hasOpenCloudKey
+      coverageGaps: openCloudPolicy.configured
         ? [
             "Aggregate AnalyticsService export support must be confirmed against official Roblox interfaces before live values are returned.",
+            ...openCloudPolicy.configurationIssues,
           ]
         : [
             "Roblox Open Cloud credentials are not configured for the running server.",
