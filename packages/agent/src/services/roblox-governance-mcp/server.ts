@@ -1,3 +1,4 @@
+import { readRobloxOpenCloudCredentialRegistry } from "./credential-registry";
 import {
   countInventory,
   readLatestEvidencePackage,
@@ -278,6 +279,7 @@ async function callTool(
 
   if (name === "get_live_telemetry_status") {
     const openCloudPolicy = readRobloxOpenCloudPolicy();
+    const credentialRegistry = readRobloxOpenCloudCredentialRegistry();
     const structuredContent = {
       configured: openCloudPolicy.configured,
       provider: "Roblox official Open Cloud or MCP-supported interfaces",
@@ -288,6 +290,13 @@ async function callTool(
       dryRun: openCloudPolicy.dryRun,
       mutationsEnabled: false,
       configurationValid: openCloudPolicy.configurationIssues.length === 0,
+      credentialLanes: credentialRegistry.lanes.map((lane) => ({
+        id: lane.id,
+        target: lane.target,
+        access: lane.access,
+        configured: lane.configured,
+        enabled: lane.enabled,
+      })),
       lastCollectionTime: null,
       coverageGaps: openCloudPolicy.configured
         ? [

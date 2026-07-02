@@ -16,7 +16,10 @@ Treat credential values as volatile secrets. Never print, persist, hash into rep
 7. Treat absent inventory, unrestricted resources, wildcard resource identifiers, source-controlled secrets, and undocumented ownership as findings.
 8. Require explicit approval before creating, regenerating, disabling, or deleting credentials.
 
-Read [references/controls.md](references/controls.md) for the control set and implementation patterns.
+Read [references/controls.md](references/controls.md) for the control set and
+implementation patterns. For Doolittle credential lanes or model-asset
+automation, also read
+[references/credential-lanes.md](references/credential-lanes.md).
 
 Deliver:
 
@@ -24,4 +27,6 @@ Deliver:
 - Least-privilege comparison
 - Rotation and expiration status
 - Group-resource isolation findings
+- Credential-lane enablement status without credential values
+- Asset artifact hash, moderation, staging evidence, and promotion findings
 - Evidence-backed remediation plan

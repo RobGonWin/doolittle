@@ -64,6 +64,29 @@ ROBLOX_OPEN_CLOUD_DRY_RUN=true
 
 All `ROBLOX_ENABLE_*` mutation flags remain `false`.
 
+## Credential registry
+
+Doolittle resolves credentials by purpose and never treats a shared environment
+variable as a key ring:
+
+```env
+ROBLOX_PROD_GOVERNANCE_API_KEY=
+ROBLOX_STAGING_PLACE_PUBLISHER_API_KEY=
+ROBLOX_STAGING_COMMERCE_API_KEY=
+ROBLOX_PROD_COMMERCE_READ_API_KEY=
+ROBLOX_PROD_COMMERCE_WRITE_API_KEY=
+ROBLOX_GROUP_ASSET_PUBLISHER_API_KEY=
+```
+
+Each credential has a separate `*_ENABLED` switch that defaults to `false`.
+The legacy `ROBLOX_OPEN_CLOUD_API_KEY` is accepted only as a production
+governance fallback so existing installations do not break. Supplying both the
+legacy and dedicated production governance variables is a configuration error.
+
+Registry status contains only lane ID, target, access class, configured state,
+and enabled state. Credential values are resolved only at the outbound request
+boundary and are never included in status or evidence.
+
 ## Phase 2: separate staging publisher
 
 Create a second key and secret binding rather than expanding the governance
@@ -90,6 +113,26 @@ Do not reuse the staging key. A production publisher needs a separate key,
 protected runtime, exact artifact hash, rollback coordinates, and explicit
 approval. The current local policy intentionally denies production mutation.
 
+## Group asset staging workflow
+
+The group asset publisher targets creator/group `32736689` with only
+`asset:read` and `asset:write`. Because the Roblox asset scope targets a creator
+rather than a universe, Doolittle treats every upload as a staging operation.
+
+Only `.rbxm` and `.rbxmx` inputs are accepted. Doolittle validates the package
+marker, records a SHA-256 manifest, requires explicit approval, polls moderation
+with a bounded attempt count, and records the returned asset ID against the
+staging universe/place. Archive, rollback, deletion, and asset-permission
+changes are denied.
+
+Production does not upload a regenerated copy. Promotion means referencing the
+exact moderated asset ID and SHA-256 hash proven in staging through a separately
+reviewed production place artifact.
+
+The asset lane remains disabled until the private worker supplies the approved
+artifact and evidence inputs. The public MCP never accepts asset bytes or owns
+the asset credential.
+
 ## Minimal integration sequence
 
 1. Create and privately store the read-only governance key.
@@ -98,5 +141,7 @@ approval. The current local policy intentionally denies production mutation.
 4. Add one official read operation only when its required Roblox scope is
    documented and covered by a redaction test.
 5. Introduce the separate staging publisher after read-only evidence is stable.
-6. Keep Trello approvals and the existing evidence pipeline as the promotion
+6. Add group-asset upload only after package validation, hash manifests,
+   moderation polling, staging evidence, and exact-ID promotion tests pass.
+7. Keep Trello approvals and the existing evidence pipeline as the promotion
    record; do not duplicate them inside the Open Cloud adapter.

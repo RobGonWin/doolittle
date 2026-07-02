@@ -1,7 +1,10 @@
+import { readRobloxOpenCloudCredentialRegistry } from "./credential-registry";
+
 export type RobloxOpenCloudEnvironment = "staging" | "production";
 
 export type RobloxOpenCloudMutationCapability =
   | "asset-mutations"
+  | "commerce-mutations"
   | "place-publishing"
   | "user-restrictions"
   | "luau-execution"
@@ -26,6 +29,7 @@ const MUTATION_FLAGS: ReadonlyArray<
   readonly [RobloxOpenCloudMutationCapability, string]
 > = [
   ["asset-mutations", "ROBLOX_ENABLE_ASSET_MUTATIONS"],
+  ["commerce-mutations", "ROBLOX_ENABLE_COMMERCE_MUTATIONS"],
   ["place-publishing", "ROBLOX_ENABLE_PLACE_PUBLISHING"],
   ["user-restrictions", "ROBLOX_ENABLE_USER_RESTRICTIONS"],
   ["luau-execution", "ROBLOX_ENABLE_LUAU_EXECUTION"],
@@ -57,6 +61,7 @@ export function readRobloxOpenCloudPolicy(
   env: Environment = process.env,
 ): RobloxOpenCloudPolicy {
   const configurationIssues: string[] = [];
+  const credentialRegistry = readRobloxOpenCloudCredentialRegistry(env);
   const rawAuthMode = env.ROBLOX_OPEN_CLOUD_AUTH_MODE?.trim().toLowerCase();
   const rawAccessMode = env.ROBLOX_OPEN_CLOUD_ACCESS_MODE?.trim().toLowerCase();
   const allowedEnvironments = readAllowedEnvironments(
@@ -78,13 +83,14 @@ export function readRobloxOpenCloudPolicy(
   if (allowedEnvironments.length === 0) {
     configurationIssues.push("No valid Open Cloud environment is allowed.");
   }
+  configurationIssues.push(...credentialRegistry.configurationIssues);
 
   const enabledMutationCapabilities = MUTATION_FLAGS.filter(([, variable]) =>
     isTrue(env[variable]),
   ).map(([capability]) => capability);
 
   return {
-    configured: Boolean(env.ROBLOX_OPEN_CLOUD_API_KEY?.trim()),
+    configured: credentialRegistry.lanes.some((lane) => lane.configured),
     authMode: "api-key",
     accessMode:
       rawAccessMode === "staging-write" ? "staging-write" : "read-only",

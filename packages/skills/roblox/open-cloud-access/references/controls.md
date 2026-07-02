@@ -51,11 +51,11 @@ Never include the API-key value, OAuth access token, refresh token, client secre
 
 ## Suggested integration pattern
 
-External TypeScript:
+External TypeScript should resolve one named lane rather than a shared key:
 
 ```ts
-const apiKey = process.env.ROBLOX_OPEN_CLOUD_API_KEY;
-if (!apiKey) throw new Error("ROBLOX_OPEN_CLOUD_API_KEY is required");
+const apiKey = process.env.ROBLOX_PROD_GOVERNANCE_API_KEY;
+if (!apiKey) throw new Error("The production governance key is required");
 
 const response = await fetch(url, {
   headers: {
@@ -78,3 +78,7 @@ Before a staging publisher is introduced, use a separate API key restricted to
 the staging universe/place and enable only `place-publishing`. Keep the public
 governance MCP read-only; a private release worker owns the key and invokes the
 policy check immediately before an Open Cloud request.
+
+Credential bindings and the asset evidence contract are defined in
+[`credential-lanes.md`](credential-lanes.md). Provisioned write keys should be
+disabled in Roblox and locally until the corresponding worker and tests exist.
