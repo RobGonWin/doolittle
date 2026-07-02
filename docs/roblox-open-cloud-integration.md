@@ -79,9 +79,11 @@ ROBLOX_GROUP_ASSET_PUBLISHER_API_KEY=
 ```
 
 Each credential has a separate `*_ENABLED` switch that defaults to `false`.
-The legacy `ROBLOX_OPEN_CLOUD_API_KEY` is accepted only as a production
-governance fallback so existing installations do not break. Supplying both the
-legacy and dedicated production governance variables is a configuration error.
+`ROBLOX_PROD_GOVERNANCE_API_KEY` is canonical. The legacy
+`ROBLOX_OPEN_CLOUD_API_KEY` is accepted as a production-governance fallback so
+existing installations do not break. Both variables may contain the same RTF
+key during migration; different values produce a configuration issue, and the
+dedicated variable takes precedence.
 
 Registry status contains only lane ID, target, access class, configured state,
 and enabled state. Credential values are resolved only at the outbound request

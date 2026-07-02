@@ -52,6 +52,31 @@ describe("Roblox Open Cloud credential registry", () => {
     expect(registry.configurationIssues).toHaveLength(1);
   });
 
+  it("accepts a matching legacy alias and prefers the dedicated variable", () => {
+    const env = {
+      ROBLOX_OPEN_CLOUD_API_KEY: "same-secret",
+      ROBLOX_PROD_GOVERNANCE_API_KEY: "same-secret",
+    };
+    const registry = readRobloxOpenCloudCredentialRegistry(env);
+
+    expect(registry.configurationIssues).toEqual([]);
+    expect(resolveRobloxOpenCloudCredential("prod-governance", env)).toBe(
+      "same-secret",
+    );
+    expect(
+      getRobloxOpenCloudCredentialLane(registry, "prod-governance"),
+    ).toMatchObject({ configured: true, usesLegacyFallback: false });
+  });
+
+  it("prefers the dedicated governance key when aliases differ", () => {
+    expect(
+      resolveRobloxOpenCloudCredential("prod-governance", {
+        ROBLOX_OPEN_CLOUD_API_KEY: "legacy-secret",
+        ROBLOX_PROD_GOVERNANCE_API_KEY: "dedicated-secret",
+      }),
+    ).toBe("dedicated-secret");
+  });
+
   it("never places credential values in registry metadata", () => {
     const registry = readRobloxOpenCloudCredentialRegistry({
       ROBLOX_GROUP_ASSET_PUBLISHER_API_KEY: "private-asset-secret",

@@ -117,15 +117,19 @@ function readIdAllowlist(value: string | undefined): string[] {
 export function readRobloxOpenCloudCredentialRegistry(
   env: Environment = process.env,
 ): RobloxOpenCloudCredentialRegistry {
-  const legacyConfigured = isConfigured(env.ROBLOX_OPEN_CLOUD_API_KEY);
-  const dedicatedGovernanceConfigured = isConfigured(
-    env.ROBLOX_PROD_GOVERNANCE_API_KEY,
-  );
+  const legacyGovernanceKey = env.ROBLOX_OPEN_CLOUD_API_KEY?.trim();
+  const dedicatedGovernanceKey = env.ROBLOX_PROD_GOVERNANCE_API_KEY?.trim();
+  const legacyConfigured = isConfigured(legacyGovernanceKey);
+  const dedicatedGovernanceConfigured = isConfigured(dedicatedGovernanceKey);
   const configurationIssues: string[] = [];
 
-  if (legacyConfigured && dedicatedGovernanceConfigured) {
+  if (
+    legacyConfigured &&
+    dedicatedGovernanceConfigured &&
+    legacyGovernanceKey !== dedicatedGovernanceKey
+  ) {
     configurationIssues.push(
-      "Both the legacy and dedicated production governance credentials are configured.",
+      "The legacy and dedicated production governance credentials contain different values.",
     );
   }
 
@@ -172,10 +176,11 @@ export function resolveRobloxOpenCloudCredential(
   const definition = LANE_DEFINITIONS.find((candidate) => candidate.id === id);
   if (!definition) return undefined;
 
-  const dedicated = env[definition.secretEnvironmentVariable]?.trim();
-  if (dedicated) return dedicated;
   if (id === "prod-governance") {
-    return env.ROBLOX_OPEN_CLOUD_API_KEY?.trim() || undefined;
+    const governanceKey =
+      env.ROBLOX_PROD_GOVERNANCE_API_KEY?.trim() ??
+      env.ROBLOX_OPEN_CLOUD_API_KEY?.trim();
+    return governanceKey || undefined;
   }
-  return undefined;
+  return env[definition.secretEnvironmentVariable]?.trim() || undefined;
 }

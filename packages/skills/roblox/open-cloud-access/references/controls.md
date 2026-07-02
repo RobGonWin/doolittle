@@ -54,7 +54,9 @@ Never include the API-key value, OAuth access token, refresh token, client secre
 External TypeScript should resolve one named lane rather than a shared key:
 
 ```ts
-const apiKey = process.env.ROBLOX_PROD_GOVERNANCE_API_KEY;
+const apiKey =
+  process.env.ROBLOX_PROD_GOVERNANCE_API_KEY ??
+  process.env.ROBLOX_OPEN_CLOUD_API_KEY;
 if (!apiKey) throw new Error("The production governance key is required");
 
 const response = await fetch(url, {
